@@ -5,8 +5,6 @@
 use Packer\Packer;
 use MODX\Revolution\modExtraManagerController;
 
-$a = 0;
-
 class PackerSettingManagerController extends modExtraManagerController
 {
     public Packer $packer;
@@ -27,7 +25,10 @@ class PackerSettingManagerController extends modExtraManagerController
      */
     public function getLanguageTopics()
     {
-        return [];
+        return  [
+            'packer:default',
+            'packer:setting',
+        ];
     }
 
 
@@ -45,8 +46,7 @@ class PackerSettingManagerController extends modExtraManagerController
      */
     public function getPageTitle()
     {
-        return 'Packer';
-        // return $this->modx->lexicon('synccatalogmanager');
+        return $this->modx->lexicon('packer');
     }
 
 
@@ -71,7 +71,7 @@ class PackerSettingManagerController extends modExtraManagerController
      */
     public function getTemplateFile()
     {
-        // $this->content .= '<div id="synccatalogmanager-panel-catalog-div"></div>';
+        $this->content .= '<div id="packer-panel"></div>';
         return '';
     }
 
