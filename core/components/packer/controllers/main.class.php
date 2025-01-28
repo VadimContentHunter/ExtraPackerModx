@@ -5,7 +5,7 @@
 use Packer\Packer;
 use MODX\Revolution\modExtraManagerController;
 
-class PackerSettingManagerController extends modExtraManagerController
+class PackerMainManagerController extends modExtraManagerController
 {
     public Packer $packer;
 
@@ -71,7 +71,7 @@ class PackerSettingManagerController extends modExtraManagerController
      */
     public function getTemplateFile()
     {
-        $this->content .= '<div id="packer-panel"></div>';
+        $this->content .= '<div id="packer-panel-main-div"></div>';
         return '';
     }
 
