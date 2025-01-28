@@ -1,7 +1,7 @@
 <?php
 
 use Packer\Packer;
-use Error;
+use MODX\Revolution\modX;
 
 $currentDir = __DIR__;
 $configCorePath = null;
@@ -18,11 +18,18 @@ while ($currentDir !== '/' && $currentDir !== '' && $currentDir !== '.') {
 if ($configCorePath) {
     require_once $configCorePath;
 } else {
-    throw new Exception('Файл config.core.php не найден.');
+    throw new Error('Файл config.core.php не найден.');
 }
 
+require_once MODX_CORE_PATH . 'config/' . MODX_CONFIG_KEY . '.inc.php';
+require_once MODX_CONNECTORS_PATH . 'index.php';
+
+/**
+ * @var modX $modx
+ */
+
 $packer = $modx->services->get('Packer');
-if(!($packer instanceof Packer)) {
+if (!($packer instanceof Packer)) {
     throw new Error('Не найден класс Packer');
 }
 

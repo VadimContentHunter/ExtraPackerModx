@@ -44,5 +44,8 @@ spl_autoload_register(function ($class) {
 $modx->addPackage('Packer\Model', '/var/www/test-modx/extras/Packer/core/components/packer/model/', null, 'Packer\\');
 
 $modx->services->add('Packer', function ($c) use ($modx) {
-    return new Packer($modx, []);
+    $assetUrl = $modx->getOption('extra_packer_assets_url');
+    return new Packer($modx, [
+        'assetsUrl' => $assetUrl !== null ? '/' . trim($assetUrl) : null,
+    ]);
 });

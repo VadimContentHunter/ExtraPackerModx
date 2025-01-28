@@ -30,8 +30,8 @@ class Packer
             'processorsPath' => $this->joinPath([$corePath, 'processors/'], false),
             'templatesPath' => $this->joinPath([$corePath, 'templates/'], false),
             'chunksPath' => $this->joinPath([$corePath, 'elements/chunks/'], false),
-            'jsUrl' => $this->joinPath([$assetsUrl, 'js/'], false),
-            'cssUrl' => $this->joinPath([$assetsUrl, 'css/'], false),
+            // 'jsUrl' => $this->joinPath([$assetsUrl, 'js/'], false),
+            // 'cssUrl' => $this->joinPath([$assetsUrl, 'css/'], false),
             'assetsUrl' => $this->joinPath([$assetsUrl], false),
             'connectorUrl' => $this->joinPath([$assetsUrl, 'connector.php'], false),
         ], $config);
