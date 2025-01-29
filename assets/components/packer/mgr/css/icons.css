@@ -1,26 +1,17 @@
 
 /************** icon-power **************/
-.icon-power {
+.icon-close {
     display: block;
     width: 100%;
     height: 100%;
-    -webkit-mask: url(../resources/icons/power-button.svg);
+    -webkit-mask: url(../resources/icons/icon-close.svg);
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-size: contain;
-    mask: url(../resources/icons/power-button.svg);
+    mask: url(../resources/icons/icon-close.svg);
     mask-repeat: no-repeat;
     mask-size: contain;
-    background-color: #838383;
+    background-color: #bd5c5c;
 }
-
-.icon-power-red {
-    background-color: #8d3b3b !important;
-}
-
-.icon-power-green {
-    background-color: #499b61 !important;
-}
-
 
 .icon-edit-pen {
     display: block;
@@ -32,5 +23,5 @@
     mask: url(../resources/icons/edit-pen.svg);
     mask-repeat: no-repeat;
     mask-size: contain;
-    background-color: #838383;
+    background-color: #658a5e;
 }

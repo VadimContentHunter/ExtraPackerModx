@@ -188,6 +188,14 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                     },
                     scope: this,
                 },
+                failure: {
+                    fn: function (response) {
+                        // Если запрос завершился неудачей, отображаем сообщение об ошибке
+                        var errorMessage = response.message || 'Произошла ошибка при удалении компонента.';
+                        MODx.msg.alert('Ошибка', errorMessage);
+                    },
+                    scope: this,
+                },
             },
         });
     },

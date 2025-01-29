@@ -178,27 +178,35 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
         }
     },
 
-    // disableItem: function () {
-    //     const ids = this._getSelectedIds();
-    //     if (!ids.length) {
-    //         return false;
-    //     }
-    //     MODx.Ajax.request({
-    //         url: this.config.url,
-    //         params: {
-    //             action: "SyncCatalogManager\\Processors\\synchronization\\Categories\\DeactivateCategories",
-    //             ids: Ext.util.JSON.encode(ids),
-    //         },
-    //         listeners: {
-    //             success: {
-    //                 fn: function () {
-    //                     this.refresh();
-    //                 },
-    //                 scope: this,
-    //             },
-    //         },
-    //     });
-    // },
+    removeItem: function () {
+        const ids = this._getSelectedIds();
+        if (!ids.length) {
+            return false;
+        }
+        MODx.Ajax.request({
+            url: this.config.url,
+            params: {
+                action: "Packer\\Processors\\DeleteComponentProcessor",
+                ids: Ext.util.JSON.encode(ids),
+            },
+            listeners: {
+                success: {
+                    fn: function () {
+                        this.refresh();
+                    },
+                    scope: this,
+                },
+                failure: {
+                    fn: function (response) {
+                        // Если запрос завершился неудачей, отображаем сообщение об ошибке
+                        var errorMessage = response.message || 'Произошла ошибка при удалении компонента.';
+                        MODx.msg.alert('Ошибка', errorMessage);
+                    },
+                    scope: this,
+                },
+            },
+        });
+    },
 
     onClick: function (e) {
         let elem = e.getTarget();

@@ -72,23 +72,14 @@ class GetCreatedComponentsProcessor extends Processor
                 "title" => "Обзор / Редактировать",
             ],
             [
-                "action" => $active ? "disableItem" : "enableItem",
+                "action" => "removeItem",
                 "button" => true,
                 "cls" => "",
-                "icon" => "icon-power" . ($active ? " icon-power-red" : " icon-power-green"),
+                "icon" => "icon-close",
                 "menu" => true,
-                "multiple" => $active ? "Выключить товары" : "Включить товары",
-                "title" => $active ? "Выключить товар" : "Включить товар",
-            ],
-            [
-                "action" => !$active ? "disableItem" : "enableItem",
-                "button" => false,
-                "cls" => "",
-                "icon" => "icon-power" . (!$active ? " icon-power-red" : " icon-power-green"),
-                "menu" => true,
-                "multiple" => !$active ? "Выключить товары" : "Включить товары",
-                "onlyMultiple" => true,
-                "title" => !$active ? "Выключить товар" : "Включить товар",
+                "multiple" => false,
+                "onlyMultiple" => false,
+                "title" => "Удалить компонент",
             ],
         ];
     }
