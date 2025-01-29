@@ -15,15 +15,20 @@ packerInstance.window.Settings = function (config) {
             componentId: config.componentId,
         },
         title: "Настройки",
-        // width: 800,
+        width: 800,
         fields: [
             {
                 layout: "column",
                 items: [
                     {
-                        columnWidth: 1,
+                        columnWidth: 0.5,
                         layout: "form",
                         items: this.getFieldsLeftColumn(),
+                    },
+                    {
+                        columnWidth: 0.5,
+                        layout: "form",
+                        items: this.getFieldsRightColumn(),
                     },
                 ],
             },
@@ -99,6 +104,15 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                 }
             }),
             packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите путь к проекта",
+                fieldName: "project_path",
+                descriptionText: "Введите путь к проекту. Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                config: {
+                    vtype: "ValidPath",
+                    msgTarget: "under",
+                }
+            }),
+            packerInstance.utils.getFieldObject({
                 fieldLabel: "Введите url путь для ваших активов во время разработки",
                 fieldName: "project_assets_url",
                 allowBlank: true,
@@ -106,36 +120,6 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                     "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
                 config: {
                     vtype: "UrlPath",
-                    msgTarget: "under",
-                },
-            }),
-
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "Название пространства имен",
-                fieldName: "namespace_name",
-                descriptionText: "Введите название для пространства имен. Оно используется и во время разработки и будет установлено при распоковке.",
-                config: {
-                    vtype: "NamespaceName",
-                    msgTarget: "under",
-                }
-            }),
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "Введите путь к ядру во время разработки",
-                fieldName: "namespace_path_core",
-                descriptionText:
-                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
-                config: {
-                    vtype: "ValidPath",
-                    msgTarget: "under",
-                },
-            }),
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "Введите путь к активам во время разработки",
-                fieldName: "namespace_path_assets",
-                descriptionText:
-                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
-                config: {
-                    vtype: "ValidPath",
                     msgTarget: "under",
                 },
             }),
@@ -150,6 +134,42 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
             //         checked: true, // Установить по умолчанию
             //     },
             // }),
+        ];
+    },
+
+    getFieldsRightColumn: function () {
+        return [
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Название пространства имен",
+                fieldName: "system_namespace_name",
+                descriptionText: "Введите название для пространства имен. Оно используется и во время разработки и будет установлено при распоковке.",
+                config: {
+                    vtype: "NamespaceName",
+                    msgTarget: "under",
+                }
+            }),
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите путь к ядру во время разработки",
+                fieldName: "system_namespace_path_core",
+                descriptionText:
+                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: true,
+                config: {
+                    vtype: "ValidPath",
+                    msgTarget: "under",
+                },
+            }),
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите путь к активам во время разработки",
+                fieldName: "system_namespace_path_assets",
+                descriptionText:
+                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: true,
+                config: {
+                    vtype: "ValidPath",
+                    msgTarget: "under",
+                },
+            }),
         ];
     },
 

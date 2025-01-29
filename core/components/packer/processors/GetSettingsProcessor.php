@@ -19,11 +19,12 @@ class GetSettingsProcessor extends Processor
         //             : $this->failure('Данные продукта небыли найдены.');
 
         return $this->success(object: [
-            "project_name" => "Test1",
-            "project_assets_url" => "extras/Packer/assets/components/packer",
-            "namespace_name" => "testprojectone",
-            "namespace_path_core" => "extras/Packer/core/components/packer/",
-            "namespace_path_assets" => "extras/Packer/assets/components/packer/"
+            "project_name" => "",
+            "project_path" => "",
+            "project_assets_url" => "",
+            "system_namespace_name" => "",
+            "system_namespace_path_core" => "",
+            "system_namespace_path_assets" => ""
         ]);
     }
 }
