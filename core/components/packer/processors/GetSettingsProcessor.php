@@ -4,7 +4,7 @@ namespace Packer\Processors;
 
 use MODX\Revolution\Processors\Processor;
 
-class SaveSettingsProcessor extends Processor
+class GetSettingsProcessor extends Processor
 {
     public function process() {
         // $productId = $this->getProperty('product_id');
@@ -18,6 +18,12 @@ class SaveSettingsProcessor extends Processor
         //             ? $this->success('Данные продукта получены успешно.', $product)
         //             : $this->failure('Данные продукта небыли найдены.');
 
-        return $this->success();
+        return $this->success(object: [
+            "project_name" => "Test1",
+            "project_assets_url" => "extras/Packer/assets/components/packer",
+            "namespace_name" => "testprojectone",
+            "namespace_path_core" => "extras/Packer/core/components/packer/",
+            "namespace_path_assets" => "extras/Packer/assets/components/packer/"
+        ]);
     }
 }

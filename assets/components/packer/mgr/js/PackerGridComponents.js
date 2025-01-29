@@ -12,7 +12,7 @@ packerInstance.grid.Components = function (config) {
         tbar: this.getTopBar(),
         sm: sm,
         baseParams: {
-            action: "Packer\\Processors\\SaveSettingsProcessor",
+            action: "Packer\\Processors\\GetCreatedComponentsProcessor",
         },
         listeners: {
             // rowDblClick: function (grid, rowIndex, e) {
@@ -103,6 +103,7 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
         return [
             {
                 text: "Создать компонент",
+                cls: "primary-button",
                 handler: function (e) {
                     const w = MODx.load({
                         xtype: "packer-window-settings",
@@ -146,10 +147,35 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
             this,
             ids
         );
-        console.log(menu);
+        // console.log(menu);
         
 
         this.addContextMenuItem(menu);
+    },
+
+    openEditProduct: function () {
+        const ids = this._getSelectedIds();
+        if (!ids.length) {
+            return false;
+        }
+        let id = JSON.parse(Ext.util.JSON.encode(ids));
+        if (Array.isArray(id)) {
+            id = id[0];
+            let rowIndex = this.getStore().find("id", id);
+            const row = this.getStore().getAt(rowIndex);
+            console.log(row);
+            
+            if (typeof row.editProduct !== "object") {
+                row.editProduct = MODx.load({
+                    xtype: "packer-window-settings",
+                    id: Ext.id(),
+                    parent: row,
+                    componentId: row.id
+                });
+            }
+            row.editProduct.show();
+
+        }
     },
 
     // disableItem: function () {

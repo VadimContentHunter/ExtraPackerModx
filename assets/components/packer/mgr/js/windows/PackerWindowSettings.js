@@ -4,10 +4,15 @@ packerInstance.window.Settings = function (config) {
         config.id = "packer-window-settings";
     }
 
+    if (!config.componentId) {
+        config.componentId = null;
+    }
+
     Ext.applyIf(config, {
         url: packerInstance.config.connectorUrl,
         baseParams: {
             action: "Packer\\Processors\\SaveSettingsProcessor",
+            componentId: config.componentId,
         },
         title: "Настройки",
         // width: 800,
@@ -16,50 +21,16 @@ packerInstance.window.Settings = function (config) {
                 layout: "column",
                 items: [
                     {
-                        // xtype: "form",
                         columnWidth: 1,
                         layout: "form",
-                        // id: "general_requests_form",
-                        items: {
-                            xtype: "fieldset",
-                            title: "Настройка синхронизации с 'проектом 111'",
-                            collapsible: false,
-                            items: this.getFieldsLeftColumn(),
-                        },
+                        items: this.getFieldsLeftColumn(),
                     },
-                    // {
-                    //     // xtype: "form",
-                    //     columnWidth: 0.5,
-                    //     layout: "form",
-                    //     // id: "order_requests_form",
-                    //     items: {
-                    //         xtype: "fieldset",
-                    //         title: "Настройка обработчика продуктов для сохранений данных из синхронизации",
-                    //         collapsible: false,
-                    //         items: this.getFieldsRightColumn(),
-                    //     },
-                    // },
-                    // {
-                    //     // xtype: "form",
-                    //     columnWidth: 0.5,
-                    //     layout: "form",
-                    //     // id: "order_requests_form",
-                    //     items: {
-                    //         xtype: "fieldset",
-                    //         title: "Настройка обработчика нанесения для сохранений данных из синхронизации",
-                    //         collapsible: false,
-                    //         items: this.getFieldsRightColumnPrint(),
-                    //     },
-                    // },
                 ],
             },
         ],
         collapsible: false,
         parent: {
             isWindowOpen: false,
-        },
-        console: {
-            updateConsole: function () {},
         },
         listeners: {
             close: function () {
@@ -76,10 +47,8 @@ packerInstance.window.Settings = function (config) {
                 this.requestData();
             },
             success: function (response) {
-                this.console.updateConsole();
             },
             failure: function (response) {
-                this.console.updateConsole();
             },
         },
         keys: [
@@ -99,133 +68,103 @@ packerInstance.window.Settings = function (config) {
         config
     );
 
-     this.on(
-         "render",
-         function () {
-             this.loader = new Ext.LoadMask(this.getEl(), {
-                 msg: "Загрузка данных...",
-             });
-         },
-         this
-     );
+    // this.on(
+    //     "render",
+    //     function () {
+    //         this.loader = new Ext.LoadMask(this.getEl(), {
+    //             msg: "Загрузка данных...",
+    //         });
+    //     },
+    //     this
+    // );
 
-     Ext.Ajax.on(
-         "requestcomplete",
-         function () {
-             this.loader.hide();
-         },
-         this
-     );
+    // Ext.Ajax.on(
+    //     "requestcomplete",
+    //     function () {
+    //         this.loader.hide();
+    //     },
+    //     this
+    // );
 };
 Ext.extend(packerInstance.window.Settings, MODx.Window, {
     getFieldsLeftColumn: function () {
         return [
             packerInstance.utils.getFieldObject({
-                fieldLabel: "Логин",
-                fieldName: "login",
-                descriptionText: "Логин для получение выгрузки 'Проекта 111'.",
-            }),
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "Пароль",
-                fieldName: "password",
-                descriptionText: "Пароль для получение выгрузки 'Проекта 111'",
-                fieldType: "password",
-            }),
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "IP-адрес",
-                fieldName: "ipAddress",
-                descriptionText:
-                    "Укажите IP-адрес сервера. Это требует проект 111, для доступа.",
+                fieldLabel: "Название проекта",
+                fieldName: "project_name",
+                descriptionText: "Введите название проекта, оно будет участвовать для формирование папок и базовых файлов.",
                 config: {
-                    vtype: "IPAddress", // Добавление пользовательской валидации для IP-адреса
+                    vtype: "CamelCase",
+                    msgTarget: "under",
+                }
+            }),
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите url путь для ваших активов во время разработки",
+                fieldName: "project_assets_url",
+                allowBlank: true,
+                descriptionText:
+                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                config: {
+                    vtype: "UrlPath",
+                    msgTarget: "under",
+                },
+            }),
+
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Название пространства имен",
+                fieldName: "namespace_name",
+                descriptionText: "Введите название для пространства имен. Оно используется и во время разработки и будет установлено при распоковке.",
+                config: {
+                    vtype: "NamespaceName",
+                    msgTarget: "under",
+                }
+            }),
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите путь к ядру во время разработки",
+                fieldName: "namespace_path_core",
+                descriptionText:
+                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                config: {
+                    vtype: "ValidPath",
                     msgTarget: "under",
                 },
             }),
             packerInstance.utils.getFieldObject({
-                fieldLabel: "URL для размерения выгрузки",
-                fieldName: "urlPath",
+                fieldLabel: "Введите путь к активам во время разработки",
+                fieldName: "namespace_path_assets",
                 descriptionText:
-                    "Поле показывает куда система скачивает данные о выгрузке.",
-                allowBlank: true,
+                    "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
                 config: {
-                    readOnly: true,
-                    style: "color: #999999",
+                    vtype: "ValidPath",
+                    msgTarget: "under",
                 },
             }),
-        ];
-    },
-
-    getFieldsRightColumn: function () {
-        return [
-            packerInstance.utils.getFieldObject({
-                fieldXtype: "numberfield",
-                fieldLabel: "Пропускаемых продуктов",
-                fieldName: "handler_skip_product",
-                descriptionText:
-                    "Укажите сколько обработчик должен пропустить продуктов в файле.",
-                config: {
-                    allowDecimals: false,
-                    minValue: 0,
-                    maskRe: /[0-9]/,
-                },
-            }),
-            packerInstance.utils.getFieldObject({
-                fieldLabel: "Выберите chunk файла 'product.xml'",
-                fieldName: "handler_chunk_name",
-                descriptionText:
-                    "Укажите название chunk файла, с которого обработчик будет начинать.",
-                fieldXtype: "packer-combo-drop-down-list",
-            }),
-        ];
-    },
-
-    getFieldsRightColumnPrint: function () {
-        return [
-            packerInstance.utils.getFieldObject({
-                fieldXtype: "numberfield",
-                fieldLabel: "Пропускаемых продуктов для нанесения",
-                fieldName: "handler_skip_print_product",
-                descriptionText:
-                    "Укажите сколько обработчик должен пропустить продуктов для нанесения.",
-                config: {
-                    allowDecimals: false,
-                    minValue: 0,
-                    maskRe: /[0-9]/,
-                },
-            }),
+            // packerInstance.utils.getFieldObject({
+            //     fieldLabel: "Включить опцию",
+            //     fieldName: "enable_option",
+            //     fieldXtype: "checkbox", // Используем xtype чекбокса
+            //     descriptionText: "Отметьте, чтобы включить эту опцию",
+            //     descriptionHidden: false,
+            //     config: {
+            //         boxLabel: "Да", // Текст рядом с чекбоксом
+            //         checked: true, // Установить по умолчанию
+            //     },
+            // }),
         ];
     },
 
     requestData: function () {
-        this.loader.show();
+        // this.loader.show();
         MODx.Ajax.request({
             url: this.url,
             params: {
-                action: "Packer\\Processors\\SaveSettingsProcessor",
+                action: "Packer\\Processors\\GetSettingsProcessor",
+                componentId: this.config.componentId,
             },
             listeners: {
                 success: {
                     fn: function (response) {
                         this.setValues(response.object);
-
-                        // console.log(response.object.dropDownLists);
-                        // if (Array.isArray(response.object.dropDownLists)) {
-                        //     response.object.dropDownLists.forEach((item) => {
-                        //         // Проверяем, что компонент уже был создан и данные загружены
-                        //         let form = this?.fp?.getForm();
-                        //         let comboField = form?.findField(item.name);
-                        //         // console.log(comboField);
-                        //         if (comboField) {
-                        //             // Устанавливаем список для выпадающего меню
-                        //             comboField.getStore().loadData(item.list);
-
-                        //             // Устанавливаем выбранное значение
-                        //             comboField.setValue(
-                        //                 response.object[item.name]
-                        //             );
-                        //         }
-                        //     });
-                        // }
                     },
                     scope: this,
                 },
