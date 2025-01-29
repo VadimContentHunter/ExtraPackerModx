@@ -2,8 +2,9 @@
 
 // require_once __DIR__ . '/Packer.php';
 
-use MODX\Revolution\modX;
+use xPDO\xPDO;
 use Packer\Packer;
+use MODX\Revolution\modX;
 
 /**
  * @var modX $modx
@@ -41,7 +42,23 @@ spl_autoload_register(function ($class) {
     }
 });
 
-$modx->addPackage('Packer\Model', $namespace['path'] . 'model/', null, 'Packer\\');
+
+// Проверяем наличие таблицы
+$tableName = $modx->getOption(xPDO::OPT_TABLE_PREFIX) . 'packer_projects';
+$query = $modx->query("SHOW TABLES LIKE '{$tableName}'");
+if (!$query || !$query->fetch(PDO::FETCH_COLUMN)) {
+    // Если таблицы нет, создаем ее
+    $modx->log(modX::LOG_LEVEL_INFO, "Таблица {$tableName} отсутствует. Создаем...");
+    $modx->addPackage('Packer\Model', $namespace['path'] . 'model/', null, 'Packer\\');
+    $manager = $modx->getManager();
+    if ($manager->createObjectContainer('Packer\Model\PackerProjects')) {
+        $modx->log(modX::LOG_LEVEL_INFO, "Таблица {$tableName} успешно создана.");
+    } else {
+        $modx->log(modX::LOG_LEVEL_ERROR, "Ошибка при создании таблицы {$tableName}.");
+    }
+} else {
+    $modx->log(modX::LOG_LEVEL_INFO, "Таблица {$tableName} уже существует.");
+}
 
 $modx->services->add('Packer', function ($c) use ($modx) {
     $assetUrl = $modx->getOption('extra_packer_assets_url');
