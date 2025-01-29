@@ -66,7 +66,11 @@ class PackerMainManagerController extends modExtraManagerController
 
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/Packer.js', true));
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/misc/PackerComboSearch.js', true));
+        $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/misc/PackerUtils.js', true));
+        $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/misc/VTypes.js', true));
+        $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/misc/PackerComboDropDawnList.js', true));
 
+        $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/windows/PackerWindowSettings.js', true));
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/PackerGridComponents.js', true));
 
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/PackerPanelMain.js', true));

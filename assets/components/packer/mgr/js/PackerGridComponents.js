@@ -4,7 +4,7 @@ packerInstance.grid.Components = function (config) {
     //     config.id = "packer-grid-components";
     // }
     let sm = new Ext.grid.CheckboxSelectionModel();
-    
+
     Ext.applyIf(config, {
         url: packerInstance.config.connectorUrl,
         fields: this.getFields(),
@@ -92,6 +92,19 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
 
     getTopBar: function () {
         return [
+            {
+                text: "Создать компонент",
+                handler: function (e) {
+                    const w = MODx.load({
+                        xtype: "packer-window-settings",
+                        id: Ext.id(),
+                        parent: e,
+                        console: this,
+                    });
+                    w.show();
+                },
+                scope: this,
+            },
             "->",
             {
                 xtype: "packer-field-search",
@@ -154,7 +167,7 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
         let elem = e.getTarget();
 
         if (elem.nodeName === "I") {
-           elem = elem.parentElement;
+            elem = elem.parentElement;
         }
 
         if (elem.nodeName == "BUTTON") {
