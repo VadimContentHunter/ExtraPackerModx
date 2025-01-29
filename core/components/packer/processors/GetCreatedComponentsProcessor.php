@@ -2,63 +2,59 @@
 
 namespace Packer\Processors;
 
+use Packer\Model\PackerProjects;
+use MODX\Revolution\modNamespace;
 use MODX\Revolution\Processors\Processor;
 
 class GetCreatedComponentsProcessor extends Processor
 {
-    public function process() {
-        // $productId = $this->getProperty('product_id');
-        // if($productId === null){
-        //     $this->failure('id продукта не определенно.');
-        // }
+    public function process()
+    {
+        $result = [];
 
-        // $loggerSyncBd = new LoggerSyncBd($this->modx);
-        // $product = $this->getProducts($productId, $loggerSyncBd);
-        // return $product !== null
-        //             ? $this->success('Данные продукта получены успешно.', $product)
-        //             : $this->failure('Данные продукта небыли найдены.');
+        $start  = $this->getProperty('start', 0);
+        $limit = $this->getProperty('limit', 12);
+        $sort  = $this->getProperty('sort', 'id');
+        $dir  = $this->getProperty('dir', 'ASC');
+
+        $query = $this->modx->newQuery(PackerProjects::class);
+        $query->sortby($sort, $dir);
+        $query->limit($limit, $start);
+        $projectsDb = $this->modx->getIterator(PackerProjects::class, $query);
+        foreach ($projectsDb as $project) {
+            if ($project instanceof PackerProjects) {
+                $result[] = $this->getItem($project->get('id'), $project->get('project_path')) ?? [];
+            }
+        }
 
         return json_encode([
             'success' => true,
             'total' => 12,
-            'results' => [
-                [
-                    'id' => 0,
-                    'name' => '-----',
-                    'namespaces' => "Packer",
-                    'version' => "0.4-beta",
-                    'actions' => $this->getActions()
-                ],
-                [
-                    'id' => 1,
-                    'name' => 'Какой то 1',
-                    'namespaces' => "Packer",
-                    'version' => "dev",
-                    'actions' => $this->getActions()
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'Пункт 2',
-                    'namespaces' => "Packer",
-                    'version' => "2.0",
-                    'actions' => $this->getActions()
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Третий',
-                    'namespaces' => "Третий",
-                    'version' => "0.4-beta-2",
-                    'actions' => $this->getActions()
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Третий копия',
-                    'namespaces' => "Packer Третий копия",
-                    'version' => "0.1",
-                    'actions' => $this->getActions()
-                ],
-            ],
+            'results' => $result,
         ]);
+    }
+
+    public function getItem(string|int $id, string $projectPath)
+    {
+        $filePath = rtrim($projectPath, "\\/") . "/packer_project.json";
+        if (file_exists($filePath)) {
+            $jsonContent = file_get_contents($filePath);
+            $data = json_decode($jsonContent, true);
+            if (!empty($data['system_namespace_name']) && !empty($data['project_name'])) {
+                $objNamespace = $this->modx->getObject(modNamespace::class, ['name' => $data['system_namespace_name'] ?? '']);
+                if ($objNamespace instanceof modNamespace) {
+                    return [
+                        'id' => $id,
+                        'name' => $data['project_name'],
+                        'namespaces' => $data['system_namespace_name'],
+                        'version' => "dev",
+                        'actions' => $this->getActions()
+                    ];
+                }
+            }
+        }
+
+        return null;
     }
 
     public function getActions(): array
