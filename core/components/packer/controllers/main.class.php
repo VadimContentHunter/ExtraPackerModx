@@ -63,6 +63,8 @@ class PackerMainManagerController extends modExtraManagerController
         // SyncCatalogManager.config.connector_url = "' . ($this->SyncCatalogManager->getConfig('connectorUrl') ?? '') . '";
         // Ext.onReady(function() {MODx.load({ xtype: "synccatalogmanager-page-catalog"});});
         // </script>');
+        $this->addCss($this->packer->buildPath('assetsUrl', 'mgr/css/icons.css', true));
+        $this->addCss($this->packer->buildPath('assetsUrl', 'mgr/css/my-style.css', true));
 
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/Packer.js', true));
         $this->addJavascript($this->packer->buildPath('assetsUrl', 'mgr/js/misc/PackerComboSearch.js', true));

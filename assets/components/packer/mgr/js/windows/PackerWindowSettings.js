@@ -10,14 +10,14 @@ packerInstance.window.Settings = function (config) {
             action: "Packer\\Processors\\SaveSettingsProcessor",
         },
         title: "Настройки",
-        width: 800,
+        // width: 800,
         fields: [
             {
                 layout: "column",
                 items: [
                     {
                         // xtype: "form",
-                        columnWidth: 0.5,
+                        columnWidth: 1,
                         layout: "form",
                         // id: "general_requests_form",
                         items: {
@@ -27,30 +27,30 @@ packerInstance.window.Settings = function (config) {
                             items: this.getFieldsLeftColumn(),
                         },
                     },
-                    {
-                        // xtype: "form",
-                        columnWidth: 0.5,
-                        layout: "form",
-                        // id: "order_requests_form",
-                        items: {
-                            xtype: "fieldset",
-                            title: "Настройка обработчика продуктов для сохранений данных из синхронизации",
-                            collapsible: false,
-                            // items: this.getFieldsRightColumn(),
-                        },
-                    },
-                    {
-                        // xtype: "form",
-                        columnWidth: 0.5,
-                        layout: "form",
-                        // id: "order_requests_form",
-                        items: {
-                            xtype: "fieldset",
-                            title: "Настройка обработчика нанесения для сохранений данных из синхронизации",
-                            collapsible: false,
-                            // items: this.getFieldsRightColumnPrint(),
-                        },
-                    },
+                    // {
+                    //     // xtype: "form",
+                    //     columnWidth: 0.5,
+                    //     layout: "form",
+                    //     // id: "order_requests_form",
+                    //     items: {
+                    //         xtype: "fieldset",
+                    //         title: "Настройка обработчика продуктов для сохранений данных из синхронизации",
+                    //         collapsible: false,
+                    //         items: this.getFieldsRightColumn(),
+                    //     },
+                    // },
+                    // {
+                    //     // xtype: "form",
+                    //     columnWidth: 0.5,
+                    //     layout: "form",
+                    //     // id: "order_requests_form",
+                    //     items: {
+                    //         xtype: "fieldset",
+                    //         title: "Настройка обработчика нанесения для сохранений данных из синхронизации",
+                    //         collapsible: false,
+                    //         items: this.getFieldsRightColumnPrint(),
+                    //     },
+                    // },
                 ],
             },
         ],

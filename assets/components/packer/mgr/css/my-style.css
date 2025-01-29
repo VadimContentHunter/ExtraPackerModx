@@ -1,0 +1,147 @@
+.calendar {
+    background-image: url(../resources/icons/calendar.gif) !important;
+}
+
+.console-error{
+    color: #d91e1e;
+}
+
+.console-warning{
+    color: #dbbf1f;
+}
+
+/* .console-inf{
+    color: #cc4e4e;
+} */
+
+.synccatalogmanager-menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    margin-left: -16px;
+}
+
+.synccatalogmanager-menu-icon {
+    width: 16px;
+    height: 16px;
+    padding-right: 8px;
+    /* background-color: #838383; */
+}
+
+.synccatalogmanager-actions {
+    display: flex;
+    flex-direction: row;
+}
+
+.synccatalogmanager-actions-btn-default {
+    width: 26px;
+    height: 26px;
+    /* border: none; */
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    padding: 5px;
+    background-color: inherit;
+}
+
+.synccatalogmanager-actions-btn-default:hover {
+    cursor: pointer;
+    background-color: #ccc;
+}
+
+.synccatalogmanager-actions-btn-default:hover i {
+    background-color: #666666 !important;
+}
+
+.x-grid-group-body tr, .x-panel-body tr {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.x-grid3-body .x-grid3-td-checker {
+    padding: 0 !important;
+}
+
+.x-fieldset-noborder {
+    border: 0 none transparent !important;
+}
+
+
+
+
+/*
+ *
+ *   synccatalogmanager-catalog
+ *
+ */
+
+.synccatalogmanager-catalog .x-tab-panel-bwrap {
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+.synccatalogmanager-catalog .x-window-body {
+    background-color: #f5f5f5 !important;
+}
+
+.synccatalogmanager-catalog form.x-panel-body {
+    height: 100% !important;
+}
+
+.synccatalogmanager-catalog .x-fieldset{
+    margin: 0px;
+    margin-bottom: 0px;
+}
+
+
+
+/*
+ *
+ *   synccatalogmanager-checkbox
+ *
+ */
+
+.synccatalogmanager-catalog .synccatalogmanager-checkbox .x-form-item{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    margin-top: 15px;
+}
+
+.synccatalogmanager-catalog .synccatalogmanager-checkbox .x-form-item-label{
+    margin: 0px 16px 0 0 !important;
+}
+
+
+/*
+ *
+ *   synccatalogmanager-tree
+ *
+ */
+
+ .synccatalogmanager-catalog-tree input[type="checkbox"].x-tree-node-cb {
+    display: none;
+ }
+
+
+/*
+ *
+ *   synccatalogmanager-product-categories
+ *
+ */
+
+.synccatalogmanager-product-categories .x-box-inner{
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.synccatalogmanager-product-categories .x-box-inner input{
+    width: auto !important;
+    left: auto !important;
+    margin-top: 8px
+}

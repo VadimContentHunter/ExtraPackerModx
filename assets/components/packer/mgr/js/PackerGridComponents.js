@@ -57,6 +57,7 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
             "name",
             "namespaces",
             "version",
+            "actions",
         ];
     },
 
@@ -86,6 +87,14 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
                 dataIndex: "version",
                 sortable: true,
                 width: 70,
+            },
+            {
+                header: "Действия",
+                dataIndex: "actions",
+                renderer: packerInstance.utils.renderActions,
+                sortable: false,
+                width: 120,
+                id: "actions",
             },
         ];
     },
@@ -128,18 +137,20 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
         ];
     },
 
-    // getMenu: function (grid, rowIndex) {
-    //     const ids = this._getSelectedIds();
+    getMenu: function (grid, rowIndex) {
+        const ids = this._getSelectedIds();
 
-    //     const row = grid.getStore().getAt(rowIndex);
-    //     const menu = SyncCatalogManager.utils.getMenu(
-    //         row.data["actions"],
-    //         this,
-    //         ids
-    //     );
+        const row = grid.getStore().getAt(rowIndex);
+        const menu = packerInstance.utils.getMenu(
+            row.data["actions"],
+            this,
+            ids
+        );
+        console.log(menu);
+        
 
-    //     this.addContextMenuItem(menu);
-    // },
+        this.addContextMenuItem(menu);
+    },
 
     // disableItem: function () {
     //     const ids = this._getSelectedIds();
