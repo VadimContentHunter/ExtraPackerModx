@@ -2,29 +2,36 @@
 
 namespace Packer\Processors;
 
+use MODX\Revolution\modX;
+use Packer\Model\PackerProjects;
+use MODX\Revolution\modNamespace;
 use MODX\Revolution\Processors\Processor;
 
 class GetSettingsProcessor extends Processor
 {
-    public function process() {
-        // $productId = $this->getProperty('product_id');
-        // if($productId === null){
-        //     $this->failure('id продукта не определенно.');
-        // }
+    public function process()
+    {
+        $componentId = (int)$this->getProperty('componentId');
+        if ($componentId === null) {
+            return $this->failure('id компонента не определенно.');
+        }
 
-        // $loggerSyncBd = new LoggerSyncBd($this->modx);
-        // $product = $this->getProducts($productId, $loggerSyncBd);
-        // return $product !== null
-        //             ? $this->success('Данные продукта получены успешно.', $product)
-        //             : $this->failure('Данные продукта небыли найдены.');
+        $objProject = $this->modx->getObject(PackerProjects::class, ['id' => $componentId ?? 0]);
+        if ($objProject instanceof PackerProjects) {
+            return $this->success(object: $this->getItem($objProject->get('project_path')));
+        } else {
+            return $this->failure('Компонент не найден.');
+        }
+    }
 
-        return $this->success(object: [
-            "project_name" => "",
-            "project_path" => "",
-            "project_assets_url" => "",
-            "system_namespace_name" => "",
-            "system_namespace_path_core" => "",
-            "system_namespace_path_assets" => ""
-        ]);
+    public function getItem(string $projectPath)
+    {
+        $filePath = rtrim($projectPath, "\\/") . "/packer_project.json";
+        $this->modx->log(modX::LOG_LEVEL_INFO, $filePath);
+        if (file_exists($filePath)) {
+            return json_decode(file_get_contents($filePath), true);
+        }
+
+        return null;
     }
 }
