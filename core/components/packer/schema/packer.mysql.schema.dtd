@@ -1,0 +1,27 @@
+<!ELEMENT model (object)>
+<!ATTLIST model package CDATA #REQUIRED>
+<!ATTLIST model baseClass CDATA #REQUIRED>
+<!ATTLIST model platform NMTOKEN #REQUIRED>
+<!ATTLIST model defaultEngine NMTOKEN #REQUIRED>
+<!ATTLIST model version NMTOKEN #REQUIRED>
+<!ELEMENT object (field,index)>
+<!ATTLIST object class NMTOKEN #REQUIRED>
+<!ATTLIST object table NMTOKEN #REQUIRED>
+<!ATTLIST object extends CDATA #REQUIRED>
+<!ELEMENT field EMPTY>
+<!ATTLIST field key NMTOKEN #REQUIRED>
+<!ATTLIST field dbtype NMTOKEN #REQUIRED>
+<!ATTLIST field phptype NMTOKEN #REQUIRED>
+<!ATTLIST field null NMTOKEN #REQUIRED>
+<!ATTLIST field default CDATA #REQUIRED>
+<!ELEMENT index (column)>
+<!ATTLIST index alias NMTOKEN #REQUIRED>
+<!ATTLIST index name NMTOKEN #REQUIRED>
+<!ATTLIST index primary NMTOKEN #REQUIRED>
+<!ATTLIST index unique NMTOKEN #REQUIRED>
+<!ATTLIST index type NMTOKEN #REQUIRED>
+<!ELEMENT column EMPTY>
+<!ATTLIST column key NMTOKEN #REQUIRED>
+<!ATTLIST column length CDATA #REQUIRED>
+<!ATTLIST column collation NMTOKEN #REQUIRED>
+<!ATTLIST column null NMTOKEN #REQUIRED>

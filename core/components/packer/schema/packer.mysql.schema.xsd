@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="model">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="object">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="field">
+                                <xs:complexType>
+                                    <xs:attribute name="key" use="required" />
+                                    <xs:attribute name="dbtype" use="required" />
+                                    <xs:attribute name="phptype" use="required" />
+                                    <xs:attribute name="null" type="xs:boolean" use="required" />
+                                    <xs:attribute name="default" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="index">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="column">
+                                            <xs:complexType>
+                                                <xs:attribute name="key" use="required" />
+                                                <xs:attribute name="length" use="required" />
+                                                <xs:attribute name="collation" use="required" />
+                                                <xs:attribute name="null" type="xs:boolean"
+                                                    use="required" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="alias" use="required" />
+                                    <xs:attribute name="name" use="required" />
+                                    <xs:attribute name="primary" type="xs:boolean" use="required" />
+                                    <xs:attribute name="unique" type="xs:boolean" use="required" />
+                                    <xs:attribute name="type" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="class" use="required" />
+                        <xs:attribute name="table" use="required" />
+                        <xs:attribute name="extends" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="package" use="required" />
+            <xs:attribute name="baseClass" use="required" />
+            <xs:attribute name="platform" use="required" />
+            <xs:attribute name="defaultEngine" use="required" />
+            <xs:attribute name="version" type="xs:decimal" use="required" />
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
