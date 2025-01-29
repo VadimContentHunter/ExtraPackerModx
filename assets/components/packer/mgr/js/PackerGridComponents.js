@@ -1,70 +1,66 @@
-class PackerGridComponents extends MODx.grid.Grid {
-    static xtype = "packer-grid-components";
+packerInstance.grid.Components = function (config) {
+    config = config || {};
+    // if (!config.id) {
+    //     config.id = "packer-grid-components";
+    // }
+    let sm = new Ext.grid.CheckboxSelectionModel();
+    
+    Ext.applyIf(config, {
+        url: packerInstance.config.connectorUrl,
+        fields: this.getFields(),
+        columns: this.getColumns(sm),
+        tbar: this.getTopBar(),
+        sm: sm,
+        baseParams: {
+            action: "Packer\\Processors\\SaveSettingsProcessor",
+        },
+        listeners: {
+            // rowDblClick: function (grid, rowIndex, e) {
+            //     const row = grid.store.getAt(rowIndex);
+            //     this.updateItem(grid, e, row);
+            // }
+        },
+        viewConfig: {
+            forceFit: true,
+            autoFill: true,
+            scrollOffset: 0,
+            // enableRowBody: true,
+            // showPreview: true,
+            // getRowClass: function (rec) {
+            //     return !rec.data.active ? "synccatalogmanager-grid-row-disabled" : "";
+            // },
+        },
+        paging: true,
+        pageSize: 12,
+        remoteSort: true,
+        autoHeight: true,
+    });
+    packerInstance.grid.Components.superclass.constructor.call(this, config);
 
-    constructor(config = {}) {
-        let selModel = new Ext.grid.CheckboxSelectionModel();
+    // Clear selection on grid refresh
+    this.store.on(
+        "load",
+        function () {
+            if (this._getSelectedIds().length) {
+                this.getSelectionModel().clearSelections();
+            }
+        },
+        this
+    );
+};
+Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
+    // windows: {},
 
-        Ext.applyIf(config, {
-            url: packerInstance.config.connectorUrl,
-            fields: PackerGridComponents.getFields(),
-            columns: PackerGridComponents.getColumns(selModel),
-            // tbar: PackerGridComponents.getTopBar(),
-            sm: selModel,
-            baseParams: {
-                action: "Packer\\Processors\\SaveSettingsProcessor",
-            },
-            listeners: {
-                // rowDblClick: function (grid, rowIndex, e) {
-                //     const row = grid.store.getAt(rowIndex);
-                //     this.updateItem(grid, e, row);
-                // }
-            },
-            viewConfig: {
-                forceFit: true,
-                autoFill: true,
-                scrollOffset: 0,
-                // enableRowBody: true,
-                // showPreview: true,
-                // getRowClass: function (rec) {
-                //     return !rec.data.active ? "synccatalogmanager-grid-row-disabled" : "";
-                // },
-            },
-            paging: true,
-            pageSize: 12,
-            remoteSort: true,
-            autoHeight: true,
-        });
-        super(config);
-
-        this.initStore();
-    }
-
-    initStore() {
-        // Clear selection on grid refresh
-        this.store.on(
-            "load",
-            function () {
-                if (this._getSelectedIds().length) {
-                    this.getSelectionModel().clearSelections();
-                }
-            },
-            this
-        );
-    }
-
-    static getFields() {
+    getFields: function () {
         return [
             "id",
-            "page_id",
             "name",
-            "parent_page_id",
-            "count_product",
-            "activate",
-            "actions",
+            "namespaces",
+            "version",
         ];
-    }
+    },
 
-    static getColumns(sm) {
+    getColumns: function (sm) {
         return [
             sm,
             {
@@ -74,52 +70,31 @@ class PackerGridComponents extends MODx.grid.Grid {
                 width: 70,
             },
             {
-                header: "id на сервере",
-                dataIndex: "page_id",
-                sortable: true,
-                width: 120,
-            },
-            {
                 header: "Название",
                 dataIndex: "name",
                 sortable: true,
                 width: 200,
             },
             {
-                header: "Принадлежит",
-                dataIndex: "parent_page_id",
+                header: "Пространства имён",
+                dataIndex: "namespaces",
                 sortable: true,
-                width: 120,
+                width: 200,
             },
             {
-                header: "Кол-во товаров",
-                dataIndex: "count_product",
+                header: "Версия",
+                dataIndex: "version",
                 sortable: true,
-                width: 120,
+                width: 70,
             },
-            // {
-            //     header: "Включено",
-            //     dataIndex: "activate",
-            //     renderer: SyncCatalogManager.utils.renderBoolean,
-            //     sortable: true,
-            //     width: 100,
-            // },
-            // {
-            //     header: "Действия",
-            //     dataIndex: "actions",
-            //     renderer: SyncCatalogManager.utils.renderActions,
-            //     sortable: false,
-            //     width: 100,
-            //     id: "actions",
-            // },
         ];
-    }
+    },
 
-    static getTopBar() {
+    getTopBar: function () {
         return [
             "->",
             {
-                xtype: "synccatalogmanager-field-search",
+                xtype: "packer-field-search",
                 width: 250,
                 listeners: {
                     search: {
@@ -138,9 +113,9 @@ class PackerGridComponents extends MODx.grid.Grid {
                 },
             },
         ];
-    }
+    },
 
-    // getMenu(grid, rowIndex) {
+    // getMenu: function (grid, rowIndex) {
     //     const ids = this._getSelectedIds();
 
     //     const row = grid.getStore().getAt(rowIndex);
@@ -151,9 +126,9 @@ class PackerGridComponents extends MODx.grid.Grid {
     //     );
 
     //     this.addContextMenuItem(menu);
-    // }
+    // },
 
-    // disableItem() {
+    // disableItem: function () {
     //     const ids = this._getSelectedIds();
     //     if (!ids.length) {
     //         return false;
@@ -173,32 +148,32 @@ class PackerGridComponents extends MODx.grid.Grid {
     //             },
     //         },
     //     });
-    // }
+    // },
 
-    // onClick (e) {
-    //     let elem = e.getTarget();
+    onClick: function (e) {
+        let elem = e.getTarget();
 
-    //     if (elem.nodeName === "I") {
-    //        elem = elem.parentElement;
-    //     }
+        if (elem.nodeName === "I") {
+           elem = elem.parentElement;
+        }
 
-    //     if (elem.nodeName == "BUTTON") {
-    //         const row = this.getSelectionModel().getSelected();
-    //         if (typeof row != "undefined") {
-    //             const action = elem.getAttribute("action");
-    //             if (action == "showMenu") {
-    //                 const ri = this.getStore().find("id", row.id);
-    //                 return this._showMenu(this, ri, e);
-    //             } else if (typeof this[action] === "function") {
-    //                 this.menu.record = row.data;
-    //                 return this[action](this, e);
-    //             }
-    //         }
-    //     }
-    //     return this.processEvent("click", e);
-    // }
+        if (elem.nodeName == "BUTTON") {
+            const row = this.getSelectionModel().getSelected();
+            if (typeof row != "undefined") {
+                const action = elem.getAttribute("action");
+                if (action == "showMenu") {
+                    const ri = this.getStore().find("id", row.id);
+                    return this._showMenu(this, ri, e);
+                } else if (typeof this[action] === "function") {
+                    this.menu.record = row.data;
+                    return this[action](this, e);
+                }
+            }
+        }
+        return this.processEvent("click", e);
+    },
 
-    // enableItem() {
+    // enableItem: function () {
     //     const ids = this._getSelectedIds();
     //     if (!ids.length) {
     //         return false;
@@ -218,9 +193,9 @@ class PackerGridComponents extends MODx.grid.Grid {
     //             },
     //         },
     //     });
-    // }
+    // },
 
-    _getSelectedIds() {
+    _getSelectedIds: function () {
         const ids = [];
         const selected = this.getSelectionModel().getSelections();
 
@@ -232,17 +207,16 @@ class PackerGridComponents extends MODx.grid.Grid {
         }
 
         return ids;
-    }
+    },
 
-    // _doSearch(tf) {
-    //     this.getStore().baseParams.query = tf.getValue();
-    //     this.getBottomToolbar().changePage(1);
-    // }
+    _doSearch: function (tf) {
+        this.getStore().baseParams.query = tf.getValue();
+        this.getBottomToolbar().changePage(1);
+    },
 
-    // _clearSearch() {
-    //     this.getStore().baseParams.query = "";
-    //     this.getBottomToolbar().changePage(1);
-    // }
-}
-
-Ext.reg(PackerGridComponents.xtype, PackerGridComponents);
+    _clearSearch: function () {
+        this.getStore().baseParams.query = "";
+        this.getBottomToolbar().changePage(1);
+    },
+});
+Ext.reg("packer-grid-components", packerInstance.grid.Components);

@@ -1,33 +1,30 @@
-class PackerPanelMain extends MODx.Panel {
-    static xtype = "packer-panel-main";
-    constructor(config = {}) {
-        Ext.apply(config, {
-            baseCls: "modx-formpanel",
-            layout: "anchor",
-            hideMode: "offsets",
-            items: [
-                {
-                    html: "<h2>" + _("packer") + "</h2>",
-                    border: false,
-                    cls: "modx-page-header",
-                },
-                {
-                    xtype: "modx-tabs",
-                    defaults: { border: false, autoHeight: true },
-                    border: true,
-                    hideMode: "offsets",
-                    items: [
-                        PackerPanelMain.getPanelItem("Мои компоненты", PackerGridComponents.xtype),
-                        // this.getPanelItem("Настройки", ""),
-                    ],
-                },
-            ],
-        });
-
-        super(config);
-    }
-
-    static getPanelItem(title, xtype) {
+packerInstance.panel.Main = function (config) {
+    config = config || {};
+    Ext.apply(config, {
+        baseCls: "modx-formpanel",
+        layout: "anchor",
+        hideMode: "offsets",
+        items: [
+            {
+                html: "<h2>" + _("packer") + "</h2>",
+                border: false,
+                cls: "modx-page-header",
+            },
+            {
+                xtype: "modx-tabs",
+                defaults: { border: false, autoHeight: true },
+                border: true,
+                hideMode: "offsets",
+                items: [
+                    this.getPanelItem("Мои компоненты", "packer-grid-components"),
+                ],
+            },
+        ],
+    });
+    packerInstance.panel.Main.superclass.constructor.call(this, config);
+};
+Ext.extend(packerInstance.panel.Main, MODx.Panel, {
+    getPanelItem(title, xtype) {
         return {
             title: title,
             layout: "anchor",
@@ -39,9 +36,5 @@ class PackerPanelMain extends MODx.Panel {
             ],
         };
     }
-}
-
-Ext.reg(PackerPanelMain.xtype, PackerPanelMain);
-
-// packerInstance
-// const packerSectionInstance = new PackerPage(packerInstance, 'packer-panel-main-div');
+});
+Ext.reg("packer-panel-main", packerInstance.panel.Main);

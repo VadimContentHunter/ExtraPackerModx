@@ -1,12 +1,20 @@
-class Packer extends Ext.Component {
-    static xtype = "packer";
-    constructor(config = {}) {
-        super(config);
-    }
-}
+let Packer = function (config) {
+    config = config || {};
+    Packer.superclass.constructor.call(this, config);
+};
+Ext.extend(Packer, Ext.Component, {
+    page: {},
+    window: {},
+    grid: {},
+    tree: {},
+    panel: {},
+    combo: {},
+    config: {},
+    view: {},
+    utils: {},
+    console: {},
+    form: {},
+});
+Ext.reg("packer", Packer);
 
-// Регистрация компонента
-Ext.reg(Packer.xtype, Packer);
-
-// Создание экземпляра
 const packerInstance = new Packer();

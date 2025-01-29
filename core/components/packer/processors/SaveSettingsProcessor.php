@@ -21,7 +21,53 @@ class SaveSettingsProcessor extends Processor
         return json_encode([
             'success' => true,
             'total' => 12,
-            'results' => [],
+            'results' => [
+                [
+                    'id' => 0,
+                    'name' => '-----',
+                    'page_id' => 0,
+                    'parent_page_id' => 0,
+                    'count_product' =>  0,
+                    'activate' => false,
+                    'actions' => false,
+                ],
+                [
+                    'id' => 1,
+                    'name' => 'Какой то 1',
+                    'page_id' => 0,
+                    'parent_page_id' => 0,
+                    'count_product' =>  0,
+                    'activate' => false,
+                    'actions' => false,
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Пункт 2',
+                    'page_id' => 2,
+                    'parent_page_id' => 2,
+                    'count_product' =>  40,
+                    'activate' => false,
+                    'actions' => false,
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Третий',
+                    'page_id' => 3,
+                    'parent_page_id' => 3,
+                    'count_product' =>  30,
+                    'activate' => false,
+                    'actions' => false,
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Третий копия',
+                    'page_id' => 33,
+                    'parent_page_id' => 33,
+                    'count_product' =>  330,
+                    'activate' => false,
+                    'actions' => false,
+                ],
+            ],
         ]);
     }
 
