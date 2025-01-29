@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="Packer\Model" baseClass="xPDO\Om\xPDOObject" platform="mysql" defaultEngine="InnoDB" version="1.0">
+    <!-- Описание таблицы для хранения информации о проекте -->
+    <object class="PackerProjects" table="packer_projects" extends="xPDO\Om\xPDOSimpleObject">
+        <field key="project_path" dbtype="text" phptype="string" null="false" default="" />
+
+        <index alias="project_path" name="project_path" primary="false" unique="false" type="BTREE">
+            <column key="project_path" length="" collation="A" null="false" />
+        </index>
+    </object>
+</model>

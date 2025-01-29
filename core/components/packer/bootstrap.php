@@ -41,7 +41,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-$modx->addPackage('Packer\Model', '/var/www/test-modx/extras/Packer/core/components/packer/model/', null, 'Packer\\');
+$modx->addPackage('Packer\Model', $namespace['path'] . 'model/', null, 'Packer\\');
 
 $modx->services->add('Packer', function ($c) use ($modx) {
     $assetUrl = $modx->getOption('extra_packer_assets_url');
