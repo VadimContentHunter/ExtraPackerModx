@@ -82,6 +82,15 @@ class SettingVehicle
         ));
     }
 
+    public function addResolver(string $sourcePath)
+    {
+        $this->createVehicle();
+        $this->checkVehicle();
+        $this->vehicle->resolve('php', array(
+            'source' => $sourcePath,
+        ));
+    }
+
     public function putVehicle()
     {
         $this->createVehicle();
@@ -368,6 +377,8 @@ class PackageBuilder
         if (is_dir($this->sourceAssets)) {
             $settingVehicle->copyFile($this->sourceAssets, '/var/www/test-modx/assets/' . 'components/');
         }
+
+        $settingVehicle->addResolver(rtrim($this->projectPath) . '/_build/resolvers/uninstall_package.resolver.php');
         $settingVehicle->putVehicle();
     }
 
