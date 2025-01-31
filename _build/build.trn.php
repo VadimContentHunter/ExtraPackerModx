@@ -78,7 +78,7 @@ class SettingVehicle
         $this->checkVehicle();
         $this->vehicle->resolve('file', array(
             'source' => $sourcePath,
-            'target' => "return $targetPath;",
+            'target' => "return '$targetPath';",
         ));
     }
 
@@ -110,7 +110,6 @@ class PackageBuilder
      * @param string $version
      * @param string $release
      * @param array $config Дополнительный файл с настройками
-     * - has_add_general_category - если true, будет устанавливаться общая категория к указанным элементам
      */
     public function __construct(
         private string $projectName,
@@ -131,6 +130,10 @@ class PackageBuilder
         $this->modx->setLogTarget(XPDO_CLI_MODE ? 'ECHO' : 'HTML');
 
         $this->initPackage();
+
+        $this->generalCategory = $this->modx->newObject(modCategory::class, [
+            'category' => $this->projectName
+        ]);
     }
 
     public function checkInitBaseParameter()
@@ -148,10 +151,6 @@ class PackageBuilder
 
     public function addToGeneralCategory(xPDOObject $obj)
     {
-        if (!array_key_exists('has_add_general_category', $this->config) || !$this->config['has_add_general_category']) {
-            return false;
-        }
-
         if ($this->generalCategory === null) {
             $this->generalCategory = $this->modx->newObject(modCategory::class, [
                 'category' => $this->projectName
@@ -216,11 +215,12 @@ class PackageBuilder
                     $snippet->set($key, $value);
                 }
 
-                if (!$this->addToGeneralCategory($snippet)) {
-                    $settingVehicle = new SettingVehicle($this->modx, $this->builder);
-                    $settingVehicle->setObject($snippet, 'name');
-                    $settingVehicle->putVehicle();
-                }
+                $this->addToGeneralCategory($snippet);
+                // if (!$this->addToGeneralCategory($snippet)) {
+                //     $settingVehicle = new SettingVehicle($this->modx, $this->builder);
+                //     $settingVehicle->setObject($snippet, 'name');
+                //     $settingVehicle->putVehicle();
+                // }
             } else {
                 throw new Error("Не корректные настройки сниппета '" . $snippetName ?? 'Неизвестный' . "'");
             }
@@ -263,11 +263,12 @@ class PackageBuilder
                     $chunk->set($key, $value);
                 }
 
-                if (!$this->addToGeneralCategory($chunk)) {
-                    $settingVehicle = new SettingVehicle($this->modx, $this->builder);
-                    $settingVehicle->setObject($chunk, 'name');
-                    $settingVehicle->putVehicle();
-                }
+                $this->addToGeneralCategory($chunk);
+                // if (!$this->addToGeneralCategory($chunk)) {
+                //     $settingVehicle = new SettingVehicle($this->modx, $this->builder);
+                //     $settingVehicle->setObject($chunk, 'name');
+                //     $settingVehicle->putVehicle();
+                // }
             } else {
                 throw new Error("Не корректные настройки chunk '" . $chunkName ?? 'Неизвестный' . "'");
             }
@@ -310,11 +311,7 @@ class PackageBuilder
                     $template->set($key, $value);
                 }
 
-                if (!$this->addToGeneralCategory($template)) {
-                    $settingVehicle = new SettingVehicle($this->modx, $this->builder);
-                    $settingVehicle->setObject($template, 'templatename');
-                    $settingVehicle->putVehicle();
-                }
+                $this->addToGeneralCategory($template);
             } else {
                 throw new Error("Не корректные настройки template '" . $templateName ?? 'Неизвестный' . "'");
             }
@@ -331,21 +328,18 @@ class PackageBuilder
         foreach ($configs as $tvName => $tvConfig) {
             if (
                 is_string($tvName) &&
-                array_key_exists('name', $tvConfig) &&
+                // array_key_exists('name', $tvConfig) &&
                 array_key_exists('type', $tvConfig) &&
                 array_key_exists('elements', $tvConfig)
             ) {
 
                 $tv = $this->modx->newObject(modTemplateVar::class);
+                $tv->set('name', $tvName);
                 foreach ($tvConfig as $key => $value) {
                     $tv->set($key, $value);
                 }
 
-                if (!$this->addToGeneralCategory($tv)) {
-                    $settingVehicle = new SettingVehicle($this->modx, $this->builder);
-                    $settingVehicle->setObject($tv, 'name');
-                    $settingVehicle->putVehicle();
-                }
+                $this->addToGeneralCategory($tv);
             } else {
                 throw new Error("Не корректные настройки TV '" . $tvName ?? 'Неизвестный' . "'");
             }
@@ -359,9 +353,9 @@ class PackageBuilder
             throw new Error("Не корректный путь в параметре sourceCore: " . $this->sourceCore);
         }
 
-        $this->generalCategory = $this->modx->newObject(modCategory::class, [
-            'category' => $this->projectName
-        ]);
+        // $this->generalCategory = $this->modx->newObject(modCategory::class, [
+        //     'category' => $this->projectName
+        // ]);
 
         $settingVehicle = new SettingVehicle($this->modx, $this->builder);
         $settingVehicle->setObject($this->generalCategory, 'category');
@@ -374,27 +368,44 @@ class PackageBuilder
         if (is_dir($this->sourceAssets)) {
             $settingVehicle->copyFile($this->sourceAssets, '/var/www/test-modx/assets/' . 'components/');
         }
+        $settingVehicle->putVehicle();
     }
 
-    public function initBuilderAttributes()
+    public function initPackageAttributes()
     {
         $this->checkInitBaseParameter();
-        /* теперь запакуем файл лицензии, файл readme и параметры настройки  */
-        // $this->builder->setPackageAttributes(array(
-        //     'license' => file_get_contents($sources['docs'] . 'license.txt'),
-        //     'readme' => file_get_contents($sources['docs'] . 'readme.txt'),
-        //     'changelog' => file_get_contents($sources['docs'] . 'changelog.txt'),
-        //     'setup-options' => array(
-        //         'source' => $sources['build'] . 'setup.options.php'
-        //     ),
-        // ));
+
+        $this->builder->setPackageAttributes([
+            'license' => file_get_contents(rtrim($this->sourceCore) . '/docs/license.txt') ?: '',
+            'readme' => file_get_contents(rtrim($this->sourceCore) . '/docs/readme.txt') ?: '',
+            'changelog' => file_get_contents(rtrim($this->sourceCore) . '/docs/changelog.txt') ?: '',
+            'requires' => [
+                'modx' => '>=3.0.0'
+            ],
+            // 'setup-options' => [
+            //     'source' => $this->sourceCore . 'setup.options.php',
+            //     'install' => $this->sourceCore . 'setup/install.php',
+            //     'update' => $this->sourceCore . 'setup/update.php',
+            //     'uninstall' => $this->sourceCore . 'setup/uninstall.php',
+            //     'options' => [
+            //         'install_example' => true,
+            //         'auto_create_category' => true
+            //     ]
+            // ],
+            // 'lexicons' => [
+            //     'en' => $this->sourceCore . 'lexicon/en/',
+            //     'ru' => $this->sourceCore . 'lexicon/ru/',
+            // ]
+        ]);
     }
 
     public function build()
     {
         $this->checkInitBaseParameter();
-
+        $this->initGeneralCategory();
+        $this->initPackageAttributes();
         $this->builder->pack();
+
         $this->modx->log(modX::LOG_LEVEL_INFO, "\nСоздание пакета.\nВремя выполнения: {----}\n");
     }
 }
@@ -470,25 +481,11 @@ class PackageBuilderFactory
     }
 }
 
-
-
-
-// $packageBuilder = new PackageBuilder(
-//     PROJECT_DATA['project_name'],
-//     PROJECT_DATA['system_namespace_name'],
-//     PROJECT_DATA['project_path'],
-//     PROJECT_DATA['system_namespace_path_core'],
-//     PROJECT_DATA['system_namespace_path_assets'],
-//     PROJECT_DATA['version'],
-//     PROJECT_DATA['release'],
-//     [
-//         'has_add_general_category' => true
-//     ],
-// );
-
 $packageBuilder = PackageBuilderFactory::createFromConfig(PROJECT_DATA);
-
-// $packageBuilder->addSnippets()
-
-$packageBuilder->initGeneralCategory();
+$packageBuilder->addTv(json_decode(
+    file_get_contents(
+        PROJECT_DATA["project_path"] . "configs/tvs.conf.json"
+    ),
+    true
+));
 $packageBuilder->build();
