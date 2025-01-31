@@ -54,6 +54,8 @@ class SaveSettingsProcessor extends Processor
                 "system_namespace_path_core" => $systemNamespacePathCore ?? '',
                 "system_namespace_path_assets" => $systemNamespacePathAssets ?? '',
                 "system_assets_url_key" => $sysAssetsUrl !== null ? $sysAssetsUrl->get("key") : "",
+                "version" => "1.0",
+                "release" => "dev"
             ]);
         } catch (Error $err) {
             $this->failure($err->getMessage());

@@ -7,6 +7,5 @@
     "system_namespace_path_assets": "/var/www/test-modx/extras/Packer/assets/components/packer/",
     "system_assets_url_key": "extra_packer_assets_url",
     "version": "1.0",
-    "release": "dev",
-    "has_add_general_category": true
+    "release": "dev"
 }

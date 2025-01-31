@@ -12,8 +12,9 @@ class GetSettingsProcessor extends Processor
     public function process()
     {
         $componentId = (int)$this->getProperty('componentId');
-        if ($componentId === null) {
-            return $this->failure('id компонента не определенно.');
+        if ($componentId === 0) {
+            return $this->success();
+            // return $this->failure('id компонента не определенно.');
         }
 
         $objProject = $this->modx->getObject(PackerProjects::class, ['id' => $componentId ?? 0]);
