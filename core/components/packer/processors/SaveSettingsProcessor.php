@@ -58,19 +58,8 @@ class SaveSettingsProcessor extends Processor
                 "release" => "dev"
             ]);
         } catch (Error $err) {
-            $this->failure($err->getMessage());
+            return $this->failure($err->getMessage());
         }
-
-        // $productId = $this->getProperty('product_id');
-        // if($productId === null){
-        //     $this->failure('id продукта не определенно.');
-        // }
-
-        // $loggerSyncBd = new LoggerSyncBd($this->modx);
-        // $product = $this->getProducts($productId, $loggerSyncBd);
-        // return $product !== null
-        //             ? $this->success('Данные продукта получены успешно.', $product)
-        //             : $this->failure('Данные продукта небыли найдены.');
 
         return $this->success();
     }

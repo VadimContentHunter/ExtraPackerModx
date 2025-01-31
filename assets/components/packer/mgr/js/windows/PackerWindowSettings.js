@@ -1,3 +1,5 @@
+let hasAutoSetting = true;
+
 packerInstance.window.Settings = function (config) {
     config = config || {};
     if (!config.id) {
@@ -7,7 +9,6 @@ packerInstance.window.Settings = function (config) {
     if (!config.componentId) {
         config.componentId = null;
     }
-
     Ext.applyIf(config, {
         url: packerInstance.config.connectorUrl,
         baseParams: {
@@ -18,20 +19,99 @@ packerInstance.window.Settings = function (config) {
         width: 800,
         fields: [
             {
+                layout: "form",
+                items: [
+                    packerInstance.utils.getFieldObject({
+                        fieldXtype: "checkbox",
+                        fieldLabel: "Автоматическое заполнение",
+                        fieldName: "enable_extra_settings",
+                        descriptionText:
+                            `Если галочка будет включено, тогда все основные поля, будут сгенерированы
+                             на основе названии проекта и названии папки проекта.`,
+                        config: {
+                            checked: hasAutoSetting ? true : false,
+                            boxLabel: "Включить авто. заполнение",
+                            listeners: {
+                                check: function (checkbox, checked) {
+                                    hasAutoSetting = checked;
+                                    let extraLeftFields = Ext.getCmp("auto-settings-container");
+                                    if (extraLeftFields) {
+                                        extraLeftFields.findBy((element) => {
+                                            if (typeof element.allowBlank === "boolean" && element.allowBlank !== true) {
+                                                element.allowBlank = hasAutoSetting ? false : true;
+                                                console.log(element.getXType());
+                                            }
+                                        });
+
+                                        extraLeftFields.setVisible(checked);
+                                        extraLeftFields.doLayout();
+                                    }
+
+                                    let extraManualFields = Ext.getCmp("manual-settings-container");
+                                    if (extraManualFields) {
+                                        extraManualFields.findBy((element) => {
+                                            if (typeof element.allowBlank === "boolean" && element.allowBlank !== true) {
+                                                element.allowBlank = hasAutoSetting ? true : false;
+                                                console.log(element.getXType());
+                                            }
+                                        });
+
+                                        extraManualFields.setVisible(hasAutoSetting ? false : true);
+                                        extraManualFields.doLayout();
+                                    }
+
+                                    // Перебираем все поля и меняем allowBlank в зависимости от состояния
+                                    // autoSettingFields.forEach(function (field) {
+                                    //     field.config.allowBlank = !checked; // если авто-заполнение включено, то поле обязательно
+                                    // });
+
+                                    // manualSettingFields.forEach(function (field) {
+                                    //     field.config.allowBlank = checked; // если авто-заполнение выключено, то поле обязательно
+                                    // });
+                                },
+                            },
+                        },
+                    }),
+                ],
+            },
+            {
                 layout: "column",
+                xtype: "fieldset",
+                title: "Настройки для автоматической генерации всех параметров",
+                id: "auto-settings-container",
+                hidden: hasAutoSetting ? false : true,
                 items: [
                     {
                         columnWidth: 0.5,
                         layout: "form",
-                        items: this.getFieldsLeftColumn(),
+                        items: this.getAutoSettingFieldsLeftColumn(),
                     },
                     {
                         columnWidth: 0.5,
                         layout: "form",
-                        items: this.getFieldsRightColumn(),
-                    },
-                ],
+                        items: this.getAutoSettingFieldsRightColumn(),
+                    }
+                ]
             },
+            {
+                layout: "column",
+                xtype: "fieldset",
+                title: "Настройки для ручного ввода всех параметров",
+                id: "manual-settings-container",
+                hidden: hasAutoSetting ? true : false, // скрыты по умолчанию
+                items: [
+                    {
+                        columnWidth: 0.5,
+                        layout: "form",
+                        items: this.getManualSettingFieldsLeftColumn(),
+                    },
+                    {
+                        columnWidth: 0.5,
+                        layout: "form",
+                        items: this.getManualSettingFieldsRightColumn(),
+                    }
+                ]
+            }
         ],
         collapsible: false,
         parent: {
@@ -92,21 +172,54 @@ packerInstance.window.Settings = function (config) {
     // );
 };
 Ext.extend(packerInstance.window.Settings, MODx.Window, {
-    getFieldsLeftColumn: function () {
+
+    getAutoSettingFieldsLeftColumn: function () {
         return [
             packerInstance.utils.getFieldObject({
                 fieldLabel: "Название проекта",
                 fieldName: "project_name",
-                descriptionText: "Введите название проекта, оно будет участвовать для формирование папок и базовых файлов.",
+                descriptionText: "Введите название проекта. Оно будет использоваться для создания папок и базовых файлов.",
+                allowBlank: (hasAutoSetting ? false : true),
+                config: {
+                    vtype: "CamelCase",
+                    msgTarget: "under",
+                }
+            }),
+        ];
+    },
+
+    getAutoSettingFieldsRightColumn: function () {
+        return [
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Корневая директория проекта",
+                fieldName: "project_parent_path",
+                descriptionText: "Введите путь к директории, где будет создан ваш проект. Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: (hasAutoSetting ? false : true),
+                config: {
+                    vtype: "ValidPath",
+                    msgTarget: "under",
+                }
+            }),
+        ];
+    },
+    // hasAutoSetting
+    getManualSettingFieldsLeftColumn: function () {
+        return [
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Название проекта",
+                fieldName: "project_name",
+                descriptionText: "Введите название проекта. Оно будет использоваться для создания папок и базовых файлов.",
+                allowBlank: hasAutoSetting ? true : false,
                 config: {
                     vtype: "CamelCase",
                     msgTarget: "under",
                 }
             }),
             packerInstance.utils.getFieldObject({
-                fieldLabel: "Введите путь к проекта",
+                fieldLabel: "Введите путь к проекту (включая папку проекта)",
                 fieldName: "project_path",
                 descriptionText: "Введите путь к проекту. Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: hasAutoSetting ? true : false,
                 config: {
                     vtype: "ValidPath",
                     msgTarget: "under",
@@ -115,34 +228,24 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
             packerInstance.utils.getFieldObject({
                 fieldLabel: "Введите url путь для ваших активов во время разработки",
                 fieldName: "project_assets_url",
-                allowBlank: true,
                 descriptionText:
                     "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: true,
                 config: {
                     vtype: "UrlPath",
                     msgTarget: "under",
                 },
             }),
-            // packerInstance.utils.getFieldObject({
-            //     fieldLabel: "Включить опцию",
-            //     fieldName: "enable_option",
-            //     fieldXtype: "checkbox", // Используем xtype чекбокса
-            //     descriptionText: "Отметьте, чтобы включить эту опцию",
-            //     descriptionHidden: false,
-            //     config: {
-            //         boxLabel: "Да", // Текст рядом с чекбоксом
-            //         checked: true, // Установить по умолчанию
-            //     },
-            // }),
         ];
     },
 
-    getFieldsRightColumn: function () {
+    getManualSettingFieldsRightColumn: function () {
         return [
             packerInstance.utils.getFieldObject({
                 fieldLabel: "Название пространства имен",
                 fieldName: "system_namespace_name",
                 descriptionText: "Введите название для пространства имен. Оно используется и во время разработки и будет установлено при распоковке.",
+                allowBlank: hasAutoSetting ? true : false,
                 config: {
                     vtype: "NamespaceName",
                     msgTarget: "under",
@@ -153,7 +256,7 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                 fieldName: "system_namespace_path_core",
                 descriptionText:
                     "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
-                allowBlank: true,
+                allowBlank: hasAutoSetting ? true : false,
                 config: {
                     vtype: "ValidPath",
                     msgTarget: "under",
@@ -164,7 +267,7 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                 fieldName: "system_namespace_path_assets",
                 descriptionText:
                     "Введите путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
-                allowBlank: true,
+                allowBlank: hasAutoSetting ? true : false,
                 config: {
                     vtype: "ValidPath",
                     msgTarget: "under",
