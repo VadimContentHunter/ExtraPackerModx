@@ -2,9 +2,11 @@
 
 namespace Packer\Processors;
 
+use Error;
 use MODX\Revolution\modX;
 use Packer\Model\PackerProjects;
 use MODX\Revolution\modNamespace;
+use MODX\Revolution\modSystemSetting;
 use MODX\Revolution\Processors\Processor;
 
 class DeleteComponentProcessor extends Processor
@@ -22,19 +24,59 @@ class DeleteComponentProcessor extends Processor
         if (file_exists($filePath)) {
             $data = json_decode(file_get_contents($filePath), true);
             if (
-                !empty($data['project_path']) &&
-                $data['project_path'] === $projectPath &&
-                $this->deleteFolderRecursively($projectPath)
+                empty($data['project_path']) || $data['project_path'] !== $projectPath
             ) {
-                if (!$objProject->remove()) {
-                    return $this->failure('Не удалось удалить объект из базы данных');
-                } else {
-                    return $this->success();
-                }
+                return $this->failure(
+                    'Путь к проекту не корректный. Данные в файле и в базе данных отличаються.'
+                    . '<br>$projectPath: ' . $projectPath
+                    . '<br>$data[`project_path`]: ' . $data['project_path']
+                );
             }
-        }
 
+            if (!$this->deleteFolderRecursively($projectPath)) {
+                return $this->failure('Не удалось удалить папку проекта.');
+            }
+
+            if (!$objProject->remove()) {
+                return $this->failure('Не удалось удалить объект из базы данных');
+            }
+
+            $errors = '';
+            if (!$this->deleteNamespace($data['system_namespace_name'] ?? '')) {
+                $errors .= "<br><br>Не удалось удалить пространство имен.";
+            }
+
+            if (!$this->deleteSystemParameterAssetUrl($data['system_assets_url_key'] ?? '')) {
+                $errors.= "<br><br>Не удалось удалить ключ системной настройки для URL ассетов.<br>Ключ: "
+                    . $data['system_assets_url_key'] ?? 'unset';
+            }
+
+            if($errors === ''){
+                return $this->success();
+            } else {
+                return $this->failure($errors);
+            }
+            
+        }
         return $this->failure('Не удалось удалить Компонент.');
+    }
+
+    public function deleteSystemParameterAssetUrl(string $system_assets_url_key)
+    {
+        $setting = $this->modx->getObject(modSystemSetting::class, ['key' => $system_assets_url_key]);
+        if (!($setting instanceof modSystemSetting)) {
+            return true;
+        }
+        return $setting->remove();
+    }
+
+    public function deleteNamespace(string $system_namespace_name): bool
+    {
+        $namespace = $this->modx->getObject(modNamespace::class, ['name' => $system_namespace_name]);
+        if (!($namespace instanceof modNamespace)) {
+            return true;
+        }
+        return $namespace->remove();
     }
 
     public function deleteFolderRecursively($folderPath): bool
