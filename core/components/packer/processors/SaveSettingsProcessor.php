@@ -4,6 +4,7 @@ namespace Packer\Processors;
 
 use Error;
 use Packer\Packer;
+use MODX\Revolution\modX;
 use Packer\Model\PackerProjects;
 use MODX\Revolution\modNamespace;
 use MODX\Revolution\modSystemSetting;
@@ -17,6 +18,16 @@ class SaveSettingsProcessor extends Processor
     {
         $this->packer = $this->modx->services->get('Packer');
 
+        // автоматическая генерация
+        $enableAutoSettings = $this->getProperty('enable_auto_settings', false);
+        $projectParentPath = $this->getProperty('project_parent_path_auto_setting', '');
+        $projectNameAutoSetting = $this->getProperty('project_name_auto_setting', '');
+        if ($projectNameAutoSetting === '' && $enableAutoSettings !== false) {
+            // $this->modx->log(modX::LOG_LEVEL_INFO, json_encode($this->properties));
+            return $this->failure('Необходимо указать имя проекта.');
+        }
+        $this->generationBaseParams($enableAutoSettings, $projectParentPath, $projectNameAutoSetting);
+
         $projectName = $this->getProperty('project_name');
         $projectPath = $this->getProperty('project_path');
         $projectAssetsUrl = $this->getProperty('project_assets_url');
@@ -26,13 +37,18 @@ class SaveSettingsProcessor extends Processor
 
         if (
             $projectName === null ||
+            $projectName === '' ||
             $projectPath === null ||
             $systemNamespaceName === null ||
             $systemNamespacePathCore === null ||
             $systemNamespacePathAssets === null
         ) {
-            $this->failure('Необходимо заполнить все ОБЯЗАТЕЛЬНЫЕ поля.');
-            return;
+            $this->modx->log(modX::LOG_LEVEL_INFO, $projectName);
+            $this->modx->log(modX::LOG_LEVEL_INFO, $projectPath);
+            $this->modx->log(modX::LOG_LEVEL_INFO, $systemNamespaceName);
+            $this->modx->log(modX::LOG_LEVEL_INFO, $systemNamespacePathCore);
+            $this->modx->log(modX::LOG_LEVEL_INFO, $systemNamespacePathAssets);
+            return $this->failure('Необходимо заполнить все ОБЯЗАТЕЛЬНЫЕ поля.');
         }
 
         $systemNamespaceName = strtolower($systemNamespaceName);
@@ -79,6 +95,49 @@ class SaveSettingsProcessor extends Processor
                 }
             }
         }
+    }
+
+    public function generationBaseParams(
+        string|bool $enableAutoSettings,
+        string $projectParentPath,
+        string $projectName
+    ) {
+        if (is_string($enableAutoSettings) && $enableAutoSettings === 'on') {
+            $enableAutoSettings = true;
+            // $this->modx->log(modX::LOG_LEVEL_INFO, 'enableAutoSettings = true');
+        }
+
+        if ($enableAutoSettings !== true) {
+            // $this->modx->log(modX::LOG_LEVEL_INFO, 'if ($enableAutoSettings !== true)');
+            return;
+        }
+
+        $basePath = $this->modx->getOption('base_path');
+        if ($projectParentPath === '') {
+            $projectParentPath = rtrim($basePath, '\\/') . '/extras';
+        }
+
+
+        $projectFolderName = 'Extra' . $projectName;
+        $projectParentPath = rtrim($projectParentPath, '\\/');
+        $projectPath = $projectParentPath . '/' . $projectFolderName;
+        $projectAssetsUrl = '';
+        $namespaceName = mb_strtolower($projectName);
+        $namespaceAssets = $projectPath . '/core/components/' . $namespaceName;
+        $namespaceCore = $projectPath . '/assets/components/' . $namespaceName;
+
+        // Если путь содержит ядро, то убираем его
+        if (strpos($namespaceAssets, $basePath) === 0) {
+            $projectAssetsUrl = trim(substr($namespaceAssets, strlen($basePath)), '\\/');
+        }
+
+        $this->setProperty('project_name', $projectName);
+        $this->setProperty('project_path', $projectPath . '/');
+        $this->setProperty('project_assets_url', $projectAssetsUrl . '/');
+        $this->setProperty('system_namespace_name', $namespaceName);
+        $this->setProperty('system_namespace_path_core', $namespaceAssets . '/');
+        $this->setProperty('system_namespace_path_assets', $namespaceCore . '/');
+        // $this->modx->log(modX::LOG_LEVEL_INFO, 'generationBaseParams - END');
     }
 
 

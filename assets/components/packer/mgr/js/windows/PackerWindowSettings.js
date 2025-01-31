@@ -24,7 +24,7 @@ packerInstance.window.Settings = function (config) {
                     packerInstance.utils.getFieldObject({
                         fieldXtype: "checkbox",
                         fieldLabel: "Автоматическое заполнение",
-                        fieldName: "enable_auto-settings",
+                        fieldName: "enable_auto_settings",
                         descriptionText:
                             `Если галочка будет включено, тогда все основные поля, будут сгенерированы
                              на основе названии проекта и названии папки проекта.`,
@@ -166,7 +166,7 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
         return [
             packerInstance.utils.getFieldObject({
                 fieldLabel: "Название проекта",
-                fieldName: "project_name",
+                fieldName: "project_name_auto_setting",
                 descriptionText: "Введите название проекта. Оно будет использоваться для создания папок и базовых файлов.",
                 allowBlank: (hasAutoSetting ? false : true),
                 config: {
@@ -181,12 +181,13 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
         return [
             packerInstance.utils.getFieldObject({
                 fieldLabel: "Корневая директория проекта",
-                fieldName: "project_parent_path",
-                descriptionText: "Введите путь к директории, где будет создан ваш проект. Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
-                allowBlank: (hasAutoSetting ? false : true),
+                fieldName: "project_parent_path_auto_setting",
+                descriptionText: "Введите путь к директории, где будет создан ваш проект. (Папка для проекта будет создана автоматически) Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: true,
                 config: {
                     vtype: "ValidPath",
                     msgTarget: "under",
+                    defaultAllowBlank: true,
                 }
             }),
         ];
