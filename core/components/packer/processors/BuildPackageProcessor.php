@@ -21,7 +21,7 @@ class BuildPackageProcessor extends Processor
         $this->modx->log(modX::LOG_LEVEL_INFO, '$objProject: ' . json_encode($objProject));
         if ($objProject instanceof PackerProjects) {
             ob_start();
-                $this->buildPackage($objProject?->get('project_path') ?? '');
+            $this->buildPackage($objProject?->get('project_path') ?? '');
             $output = ob_get_clean();
             return $this->success($output);
         } else {
@@ -35,17 +35,44 @@ class BuildPackageProcessor extends Processor
         $this->modx->log(modX::LOG_LEVEL_INFO, $filePath);
         if (file_exists($filePath)) {
             $dataPackerProject = json_decode(file_get_contents($filePath), true);
-
             $packageBuilder = PackageBuilderFactory::createFromConfig($dataPackerProject);
-            // $packageBuilder->addTv(json_decode(
-            //     file_get_contents(
-            //         PROJECT_DATA["project_path"] . "configs/tvs.conf.json"
-            //     ),
-            //     true
-            // ));
+
+            $configPath = $dataPackerProject['config_path'] ?? null;
+            if (!empty($configPath)) {
+                $packageBuilder->addTv($this->readConfigFile('tvs.json', $configPath));
+                $packageBuilder->addSnippets($this->readConfigFile('snippets.json', $configPath));
+                $packageBuilder->addChunks($this->readConfigFile('chunks.json', $configPath));
+                $packageBuilder->addTemplates($this->readConfigFile('templates.json', $configPath));
+            }
+
             $packageBuilder->build();
         }
 
         return null;
+    }
+
+    public function readConfigFile(string $filename, string $directory): array
+    {
+        $filePath = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return []; // Файл не найден или недоступен
+        }
+
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        switch ($extension) {
+            case 'php':
+                return include $filePath;
+            case 'json':
+                return json_decode(file_get_contents($filePath), true) ?? [];
+            case 'ini':
+                return parse_ini_file($filePath) ?: [];
+                // case 'yaml':
+                // case 'yml':
+                //     return function_exists('yaml_parse_file') ? yaml_parse_file($filePath) : [];
+            default:
+                return []; // Неподдерживаемый формат
+        }
     }
 }
