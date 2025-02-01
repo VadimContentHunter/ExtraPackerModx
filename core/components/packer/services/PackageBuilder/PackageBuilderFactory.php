@@ -2,6 +2,7 @@
 namespace Packer\Services\PackageBuilder;
 
 use Error;
+use Packer\Services\PackageBuilder\PackageBuilder;
 
 class PackageBuilderFactory
 {

@@ -59,7 +59,6 @@ class GetCreatedComponentsProcessor extends Processor
 
     public function getActions(): array
     {
-        $active = false;
         return [
             [
                 "action" => "openEditProduct",
@@ -70,6 +69,16 @@ class GetCreatedComponentsProcessor extends Processor
                 "multiple" => false,
                 "onlyMultiple" => false,
                 "title" => "Обзор / Редактировать",
+            ],
+            [
+                "action" => "packUp",
+                "button" => true,
+                "cls" => "",
+                "icon" => "icon-arrow",
+                "menu" => true,
+                "multiple" => false,
+                "onlyMultiple" => false,
+                "title" => "Упаковать",
             ],
             [
                 "action" => "removeItem",
