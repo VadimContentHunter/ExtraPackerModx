@@ -71,8 +71,11 @@ class SaveSettingsProcessor extends Processor
                 "system_namespace_path_assets" => $systemNamespacePathAssets ?? '',
                 "system_assets_url_key" => $sysAssetsUrl !== null ? $sysAssetsUrl->get("key") : "",
                 "version" => "1.0",
-                "release" => "dev"
+                "release" => "dev",
+                "config_path" => rtrim($projectPath, '/\\') . '/configs/'
             ]);
+
+            $this->generationBaseFileFolders($projectPath, $systemNamespacePathAssets, $systemNamespacePathCore);
         } catch (Error $err) {
             return $this->failure($err->getMessage());
         }
@@ -123,8 +126,8 @@ class SaveSettingsProcessor extends Processor
         $projectPath = $projectParentPath . '/' . $projectFolderName;
         $projectAssetsUrl = '';
         $namespaceName = mb_strtolower($projectName);
-        $namespaceAssets = $projectPath . '/core/components/' . $namespaceName;
-        $namespaceCore = $projectPath . '/assets/components/' . $namespaceName;
+        $namespaceAssets = $projectPath . '/assets/components/' . $namespaceName;
+        $namespaceCore = $projectPath . '/core/components/' . $namespaceName;
 
         // Если путь содержит ядро, то убираем его
         if (strpos($namespaceAssets, $basePath) === 0) {
@@ -135,11 +138,65 @@ class SaveSettingsProcessor extends Processor
         $this->setProperty('project_path', $projectPath . '/');
         $this->setProperty('project_assets_url', $projectAssetsUrl . '/');
         $this->setProperty('system_namespace_name', $namespaceName);
-        $this->setProperty('system_namespace_path_core', $namespaceAssets . '/');
-        $this->setProperty('system_namespace_path_assets', $namespaceCore . '/');
+        $this->setProperty('system_namespace_path_core', $namespaceCore . '/');
+        $this->setProperty('system_namespace_path_assets', $namespaceAssets . '/');
         // $this->modx->log(modX::LOG_LEVEL_INFO, 'generationBaseParams - END');
     }
 
+    public function generationBaseFileFolders(string $projectPath, string $namespaceAssets, string  $namespaceCore)
+    {
+        if (is_dir($projectPath)) {
+            $configPath = rtrim($projectPath, '/\\') . '/configs/';
+            if (!is_dir($configPath)) {
+                if (!mkdir($configPath, 0777, true)) {
+                    throw new Error("Не удалось создать папку");
+                }
+            }
+        }
+
+        if (!is_dir($namespaceAssets)) {
+            // Если папки нет, создаем её
+            if (!mkdir($namespaceAssets, 0777, true)) {
+                throw new Error("Не удалось создать папку");
+            }
+        }
+
+        if (!is_dir($namespaceCore)) {
+            // Если папки нет, создаем её
+            if (!mkdir($namespaceCore, 0777, true)) {
+                throw new Error("Не удалось создать папку");
+            }
+        }
+
+        if (is_dir($namespaceCore)) {
+            
+            $pathDocs = rtrim($namespaceCore, '/\\') . '/docs/';
+            if (!is_dir($pathDocs)) {
+                // Если папки нет, создаем её
+                if (!mkdir($pathDocs, 0777, true)) {
+                    throw new Error("Не удалось создать папку");
+                }
+
+                $files = [
+                    $pathDocs . 'changelog.txt',
+                    $pathDocs . 'license.txt',
+                    $pathDocs . 'readme.txt'
+                ];
+    
+                foreach ($files as $filePath) {
+                    if (!file_exists($filePath)) {
+                        file_put_contents($filePath, "");
+                    }
+                }
+            }
+            
+
+            $bootstrap = rtrim($namespaceCore, '/\\') . '/bootstrap.php';
+            if (!file_exists($bootstrap)) {
+                file_put_contents($bootstrap, "");
+            }
+        }
+    }
 
 
     public function createProjectJsonFile(string $projectPath, array $data)
