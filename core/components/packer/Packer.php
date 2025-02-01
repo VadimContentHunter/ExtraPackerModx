@@ -21,7 +21,7 @@ class Packer
 
         $corePath = empty($config['corePath']) ? $this->processPlaceholders($modx, $namespace->get('path')) : $config['corePath'];
         $assetsPath = empty($config['assetsPath']) ? $this->processPlaceholders($modx, $namespace->get('assets_path')) : $config['assetsPath'];
-        $assetsUrl = empty($config['assetsUrl']) ? MODX_ASSETS_URL . 'components/packer/' : $config['assetsUrl'];
+        $assetsUrl = empty($config['assetsUrl']) ? $config['assetsUrl'] =  MODX_ASSETS_URL . 'components/packer/' : $config['assetsUrl'];
 
         $this->config = array_merge([
             'corePath' => $this->joinPath([$corePath], true),

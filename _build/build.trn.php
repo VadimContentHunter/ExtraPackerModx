@@ -8,6 +8,7 @@ use MODX\Revolution\modX;
 use MODX\Revolution\modChunk;
 use MODX\Revolution\modSnippet;
 use MODX\Revolution\modCategory;
+use MODX\Revolution\modMenu;
 use MODX\Revolution\modTemplate;
 use MODX\Revolution\modNamespace;
 use xPDO\Transport\xPDOTransport;
@@ -130,8 +131,8 @@ class PackageBuilder
         private string $release = "dev",
         private array $config = [],
     ) {
-        $this->newCorePath = 'core/components/' . strtolower($this->namespaceName) . '/';
-        $this->newAssetsPath = 'assets/components/' . strtolower($this->namespaceName) . '/';
+        $this->newCorePath = 'components/' . strtolower($this->namespaceName) . '/';
+        $this->newAssetsPath = 'components/' . strtolower($this->namespaceName) . '/';
 
         $this->modx = new modX();
         $this->modx->initialize('mgr');
@@ -355,6 +356,38 @@ class PackageBuilder
         }
     }
 
+    /**
+     * @param array<string,array> $configs Параметры <НазваниеTV: конфигурации>
+     * @return void
+     */
+    public function addMenu(array $configs)
+    {
+        $this->checkInitBaseParameter();
+        foreach ($configs as $menuName => $menuConfig) {
+            if (
+                is_string($menuName) &&
+                array_key_exists('action', $menuConfig)
+            ) {
+                // $this->modx->log(modX::LOG_LEVEL_INFO, $menuName);
+                $menu = $this->modx->newObject(modMenu::class);
+                $menu->set('text', $menuName);
+                $menu->set('namespace', $this->namespaceName);
+                foreach ($menuConfig as $key => $value) {
+                    if ($key === "namespace") {
+                        continue;
+                    }
+                    $menu->set($key, $value);
+                }
+
+                $settingVehicle = new SettingVehicle($this->modx, $this->builder);
+                $settingVehicle->setObject($menu, 'text', setOldPK: true);
+                $settingVehicle->putVehicle();
+            } else {
+                throw new Error("Не корректные настройки TV '" . $menuName ?? 'Неизвестный' . "'");
+            }
+        }
+    }
+
     public function initGeneralCategory()
     {
         $this->checkInitBaseParameter();
@@ -372,6 +405,7 @@ class PackageBuilder
         $settingVehicle->addRelatedObjAttribute('Chunks', 'name');
         $settingVehicle->addRelatedObjAttribute('Templates', 'templatename');
         $settingVehicle->addRelatedObjAttribute('TemplateVars', 'name');
+        $settingVehicle->addRelatedObjAttribute('Menus', 'text');
         $settingVehicle->copyFile($this->sourceCore, MODX_CORE_PATH . 'components/');
 
         if (is_dir($this->sourceAssets)) {
@@ -492,11 +526,39 @@ class PackageBuilderFactory
     }
 }
 
+function readConfigFile(string $filename, string $directory): array
+{
+    $filePath = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+
+    if (!file_exists($filePath) || !is_readable($filePath)) {
+        return []; // Файл не найден или недоступен
+    }
+
+    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+
+    switch ($extension) {
+        case 'php':
+            return include $filePath;
+        case 'json':
+            return json_decode(file_get_contents($filePath), true) ?? [];
+        case 'ini':
+            return parse_ini_file($filePath) ?: [];
+            // case 'yaml':
+            // case 'yml':
+            //     return function_exists('yaml_parse_file') ? yaml_parse_file($filePath) : [];
+        default:
+            return []; // Неподдерживаемый формат
+    }
+}
+
 $packageBuilder = PackageBuilderFactory::createFromConfig(PROJECT_DATA);
-$packageBuilder->addTv(json_decode(
-    file_get_contents(
-        PROJECT_DATA["project_path"] . "configs/tvs.conf.json"
-    ),
-    true
-));
+$configPath = PROJECT_DATA['config_path'] ?? null;
+if (!empty($configPath)) {
+    $packageBuilder->addTv(readConfigFile('tvs.json', $configPath));
+    $packageBuilder->addSnippets(readConfigFile('snippets.json', $configPath));
+    $packageBuilder->addChunks(readConfigFile('chunks.json', $configPath));
+    $packageBuilder->addTemplates(readConfigFile('templates.json', $configPath));
+    $packageBuilder->addMenu(readConfigFile('menus.json', $configPath));
+}
+
 $packageBuilder->build();

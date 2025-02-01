@@ -1,0 +1,9 @@
+{
+    "packer": {
+        "parent": "topnav",
+        "action": "main",
+        "menuindex": 3,
+        "description": "Описание первого пункта меню",
+        "icon": "<i class='icon-shipping-fast icon'></i>"
+    }
+}
