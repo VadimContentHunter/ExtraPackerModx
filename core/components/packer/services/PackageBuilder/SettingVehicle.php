@@ -29,14 +29,21 @@ class SettingVehicle
         }
     }
 
+    public function addAttribute(string $key, mixed $value)
+    {
+        $this->attributes = array_merge($this->attributes, [
+            $key => $value
+        ]);
+    }
+
     public function setObject(xPDOObject $obj, string $uniqueKey, bool $update = true, bool $setOldPK = false)
     {
         $this->obj = $obj;
-        $this->attributes = [
+        $this->attributes = array_merge($this->attributes, [
             xPDOTransport::UNIQUE_KEY => $uniqueKey,
             xPDOTransport::UPDATE_OBJECT => $update,
             xPDOTransport::PRESERVE_KEYS => $setOldPK,
-        ];
+        ]);
     }
 
     public function addRelatedObjAttribute(string $attributeName, string $uniqueKey, bool $update = true, bool $setOldPK = false)
