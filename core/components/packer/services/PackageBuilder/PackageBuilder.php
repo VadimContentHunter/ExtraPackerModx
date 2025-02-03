@@ -69,9 +69,9 @@ class PackageBuilder
 
     public function addLateBindingData(
         string $dependentClassName,
-        string $dependentKey,
-        // string $dependentSearchFieldName,
-        // string $dependentSearchFieldValue,
+        string $dependentSearchFieldValue,
+        string $dependentUseFieldName,
+        string $dependentSearchFieldName,
         array $referenceData
     ): void {
         // Убеждаемся, что для указанного класса есть массив
@@ -79,14 +79,24 @@ class PackageBuilder
             $this->lateBindingData[$dependentClassName] = [];
         }
 
-        // Убеждаемся, что для указанного имени есть массив
-        if (!isset($this->lateBindingData[$dependentClassName][$dependentKey])) {
-            $this->lateBindingData[$dependentClassName][$dependentKey] = [];
+        if (!isset($this->lateBindingData[$dependentClassName][$dependentSearchFieldValue])) {
+            $this->lateBindingData[$dependentClassName][$dependentSearchFieldValue] = [];
         }
 
+        if (!isset($this->lateBindingData[$dependentClassName][$dependentSearchFieldValue][$dependentUseFieldName])) {
+            $this->lateBindingData[$dependentClassName][$dependentSearchFieldValue][$dependentUseFieldName] = [];
+        }
+
+        $referenceData = array_merge(
+            $referenceData,
+            [
+                'dependentSearchFieldName' => $dependentSearchFieldName,
+            ],
+        );
+
         // Объединяем переданные данные с уже существующими
-        $this->lateBindingData[$dependentClassName][$dependentKey] = array_merge(
-            $this->lateBindingData[$dependentClassName][$dependentKey],
+        $this->lateBindingData[$dependentClassName][$dependentSearchFieldValue][$dependentUseFieldName] = array_merge(
+            $this->lateBindingData[$dependentClassName][$dependentSearchFieldValue][$dependentUseFieldName],
             $referenceData
         );
     }
@@ -342,36 +352,23 @@ class PackageBuilder
                     }
 
                     if ($key === "template") {
-                        $referenceData = ParameterParser::processBuild($value);
-                        $referenceData = array_merge(
-                            $referenceData,
-                            [
-                                'dependentSearchFieldName' => 'pagetitle',
-                                'dependentUseFieldName' => 'template',
-                            ],
-                        );
-
                         $this->addLateBindingData(
                             'modResource',
                             $resourcePageTitle,
-                            $referenceData
+                            'template',
+                            'pagetitle',
+                            ParameterParser::processBuild($value)
                         );
                         continue;
                     }
 
                     if ($key === "content_type") {
-                        $referenceData = ParameterParser::processBuild($value);
-                        $referenceData = array_merge(
-                            $referenceData,
-                            [
-                                'dependentSearchFieldName' => 'pagetitle',
-                                'dependentUseFieldName' => 'content_type',
-                            ],
-                        );
                         $this->addLateBindingData(
                             'modResource',
                             $resourcePageTitle,
-                            $referenceData
+                            'content_type',
+                            'pagetitle',
+                            ParameterParser::processBuild($value)
                         );
                         continue;
                     }
@@ -418,8 +415,8 @@ class PackageBuilder
             $settingVehicle->copyFile($this->sourceAssets, '/var/www/test-modx/assets/' . 'components/');
         }
 
-        $settingVehicle->addResolver(rtrim($this->projectPath) . '/_build/resolvers/uninstall_package.resolver.php');
-        $settingVehicle->addResolver(rtrim($this->projectPath) . '/_build/resolvers/LateBindingData.resolver.php');
+        $settingVehicle->addResolver(rtrim($this->sourceCore) . '/services/PackageBuilder/resolvers/uninstall_package.resolver.php');
+        $settingVehicle->addResolver(rtrim($this->sourceCore) . '/services/PackageBuilder/resolvers/LateBindingData.resolver.php');
         $settingVehicle->putVehicle();
     }
 
