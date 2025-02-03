@@ -54,15 +54,14 @@ class ModxObjectManager
         if (!$dbObject instanceof xPDOObject) {
             $modx->log(modX::LOG_LEVEL_WARN, "[Удаление объектов] Объект не найден: $className ($uniqueKey => $value)");
             return false;
+        } else {
+            $result = $dbObject->remove();
+            $modx->log(
+                $result ? modX::LOG_LEVEL_INFO : modX::LOG_LEVEL_ERROR,
+                "[Удаление объектов] " . ($result ? "Удалён" : "Ошибка удаления") . " объект: $className ($uniqueKey => $value)"
+            );
+            return $result;
         }
-
-        $result = $dbObject->remove();
-        $modx->log(
-            $result ? modX::LOG_LEVEL_INFO : modX::LOG_LEVEL_ERROR,
-            "[Удаление объектов] " . ($result ? "Удалён" : "Ошибка удаления") . " объект: $className ($uniqueKey => $value)"
-        );
-
-        return $result;
     }
 
     /**

@@ -1,0 +1,10 @@
+{
+    "sitemap": {
+      "description": "Описание sitemap",
+      "content": "build:path:read:${{core_path}}elements/sitemap.tpl",
+      "source": 1,
+      "static": 1,
+      "static_file": "build:path:core/components/${{namespace_name}}/elements/templates/sitemap.tpl"
+    }
+  }
+  

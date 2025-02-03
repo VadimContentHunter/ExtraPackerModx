@@ -8,9 +8,11 @@ use MODX\Revolution\modX;
 use MODX\Revolution\modChunk;
 use MODX\Revolution\modSnippet;
 use MODX\Revolution\modCategory;
+use MODX\Revolution\modContentType;
 use MODX\Revolution\modMenu;
 use MODX\Revolution\modTemplate;
 use MODX\Revolution\modNamespace;
+use MODX\Revolution\modResource;
 use xPDO\Transport\xPDOTransport;
 use MODX\Revolution\modTemplateVar;
 use MODX\Revolution\Transport\modPackageBuilder;
@@ -36,14 +38,21 @@ class SettingVehicle
         }
     }
 
+    public function addAttribute(string $key, mixed $value)
+    {
+        $this->attributes = array_merge($this->attributes, [
+            $key => $value
+        ]);
+    }
+
     public function setObject(xPDOObject $obj, string $uniqueKey, bool $update = true, bool $setOldPK = false)
     {
         $this->obj = $obj;
-        $this->attributes = [
+        $this->attributes = array_merge($this->attributes, [
             xPDOTransport::UNIQUE_KEY => $uniqueKey,
             xPDOTransport::UPDATE_OBJECT => $update,
             xPDOTransport::PRESERVE_KEYS => $setOldPK,
-        ];
+        ]);
     }
 
     public function addRelatedObjAttribute(string $attributeName, string $uniqueKey, bool $update = true, bool $setOldPK = false)
@@ -109,9 +118,9 @@ class PackageBuilder
 
     private ?modCategory $generalCategory = null;
 
-    private string $newCorePath = '';
+    private array $matchValueParameterParser  = [];
 
-    private string $newAssetsPath = '';
+    private array $lateBindingData = [];
 
     /**
      * @param string $projectName
@@ -131,8 +140,13 @@ class PackageBuilder
         private string $release = "dev",
         private array $config = [],
     ) {
-        $this->newCorePath = 'components/' . strtolower($this->namespaceName) . '/';
-        $this->newAssetsPath = 'components/' . strtolower($this->namespaceName) . '/';
+        $this->matchValueParameterParser = [
+            "project_path" => $this->projectPath,
+            "base_path" => $this->projectPath,
+            "core_path" => $this->sourceCore,
+            "assets_path" => $this->sourceAssets ?? '',
+            "namespace_name" => $this->namespaceName,
+        ];
 
         $this->modx = new modX();
         $this->modx->initialize('mgr');
@@ -145,6 +159,32 @@ class PackageBuilder
             'category' => $this->projectName
         ]);
     }
+
+    public function addLateBindingData(
+        string $dependentClassName,
+        string $dependentKey,
+        // string $dependentSearchFieldName,
+        // string $dependentSearchFieldValue,
+        array $referenceData
+    ): void {
+        // Убеждаемся, что для указанного класса есть массив
+        if (!isset($this->lateBindingData[$dependentClassName])) {
+            $this->lateBindingData[$dependentClassName] = [];
+        }
+
+        // Убеждаемся, что для указанного имени есть массив
+        if (!isset($this->lateBindingData[$dependentClassName][$dependentKey])) {
+            $this->lateBindingData[$dependentClassName][$dependentKey] = [];
+        }
+
+        // Объединяем переданные данные с уже существующими
+        $this->lateBindingData[$dependentClassName][$dependentKey] = array_merge(
+            $this->lateBindingData[$dependentClassName][$dependentKey],
+            $referenceData
+        );
+    }
+
+
 
     public function checkInitBaseParameter()
     {
@@ -173,13 +213,13 @@ class PackageBuilder
     {
         // $this->checkInitBaseParameter();
 
-        $corePath = '{core_path}' . $this->newCorePath;
+        $corePath = '{core_path}components/' . strtolower($this->namespaceName) . '/';
         $assetsPath = '';
 
         $objNamespace = $this->modx->getObject(modNamespace::class, ['name' => $this->namespaceName]);
         if ($objNamespace instanceof modNamespace) {
             $assetsPath = $objNamespace->get('assets_path') !== null
-                ? '{assets_path}' . $this->newAssetsPath
+                ? '{assets_path}components/' . strtolower($this->namespaceName) . '/'
                 : '';
         }
 
@@ -191,34 +231,27 @@ class PackageBuilder
 
     /**
      * @param array<string,array> $configs Параметры <НазваниеСниппета: конфигурации>
-     * - pathDev - Путь к нахождению сниппета
+     * - snippet -  в данном параметре можно использовать парсер, для получении
+     *              содержимого в файле "build:path:/.../${{base_path}}.../content.file"
+     * - static_file -  в данном параметре можно использовать парсер,для получения 
+     *                  имени файла "build:path:name:/.../${{base_path}}.../content.file"
      * @return void
      */
     public function addSnippets(array $configs)
     {
         $this->checkInitBaseParameter();
         foreach ($configs as $snippetName => $snippetConfig) {
-            $fullPath = rtrim($this->projectPath) . '/' . trim($snippetConfig['pathDev'] ?? '');
-            if (
-                is_string($snippetName) &&
-                array_key_exists('pathDev', $snippetConfig) &&
-                file_exists($fullPath)
-            ) {
-                $fileNameWithExtension = basename($fullPath);
-
+            if (is_string($snippetName)) {
                 $snippet = $this->modx->newObject(modSnippet::class);
-                foreach ($snippet as $key => $value) {
-                    if ($key === "pathDev") {
-                        continue;
-                    }
-
+                $snippet->set('name', $snippetName);
+                foreach ($snippetConfig as $key => $value) {
                     if ($key === "snippet") {
-                        $snippet->set($key, file_get_contents($fullPath));
+                        $snippet->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
                     if ($key === "static_file") {
-                        $snippet->set($key, $this->newCorePath . 'elements/snippets/' . $fileNameWithExtension);
+                        $snippet->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
@@ -239,34 +272,27 @@ class PackageBuilder
 
     /**
      * @param array<string,array> $configs Параметры <НазваниеЧанка: конфигурации>
-     * - pathDev - Путь к нахождению сниппета
+     * - snippet -  в данном параметре можно использовать парсер, для получении
+     *              содержимого в файле "build:path:/.../${{base_path}}.../content.file"
+     * - static_file -  в данном параметре можно использовать парсер,для получения 
+     *                  имени файла "build:path:name:/.../${{base_path}}.../content.file"
      * @return void
      */
     public function addChunks(array $configs)
     {
         $this->checkInitBaseParameter();
         foreach ($configs as $chunkName => $chunkConfig) {
-            $fullPath = rtrim($this->projectPath) . '/' . trim($snippetConfig['pathDev'] ?? '');
-            if (
-                is_string($chunkName) &&
-                array_key_exists('pathDev', $chunkConfig) &&
-                file_exists($fullPath)
-            ) {
-                $fileNameWithExtension = basename($fullPath);
-
+            if (is_string($chunkName)) {
                 $chunk = $this->modx->newObject(modChunk::class);
-                foreach ($chunk as $key => $value) {
-                    if ($key === "pathDev") {
-                        continue;
-                    }
-
+                $chunk->set('name', $chunkName);
+                foreach ($chunkConfig as $key => $value) {
                     if ($key === "snippet") {
-                        $chunk->set($key, file_get_contents($fullPath));
+                        $chunk->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
                     if ($key === "static_file") {
-                        $chunk->set($key, $this->newCorePath . 'elements/chunks/' . $fileNameWithExtension);
+                        $chunk->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
@@ -287,34 +313,28 @@ class PackageBuilder
 
     /**
      * @param array<string,array> $configs Параметры <НазваниеTemplate: конфигурации>
-     * - pathDev - Путь к нахождению сниппета
+     *  - content - в данном параметре можно использовать парсер, для получении
+     *              содержимого в файле "build:path:/.../${{base_path}}.../content.file"
+     *  - static_file - в данном параметре можно использовать парсер,для получения 
+     *                  имени файла "build:path:name:/.../${{base_path}}.../content.file"
      * @return void
      */
     public function addTemplates(array $configs)
     {
         $this->checkInitBaseParameter();
         foreach ($configs as $templateName => $templateConfig) {
-            $fullPath = rtrim($this->projectPath) . '/' . trim($snippetConfig['pathDev'] ?? '');
-            if (
-                is_string($templateName) &&
-                array_key_exists('pathDev', $templateConfig) &&
-                file_exists($fullPath)
-            ) {
-                $fileNameWithExtension = basename($fullPath);
+            if (is_string($templateName)) {
 
                 $template = $this->modx->newObject(modTemplate::class);
-                foreach ($template as $key => $value) {
-                    if ($key === "pathDev") {
-                        continue;
-                    }
-
+                $template->set('templatename', $templateName);
+                foreach ($templateConfig as $key => $value) {
                     if ($key === "content") {
-                        $template->set($key, file_get_contents($fullPath));
+                        $template->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
                     if ($key === "static_file") {
-                        $template->set($key, $this->newCorePath . 'elements/templates/' . $fileNameWithExtension);
+                        $template->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
                         continue;
                     }
 
@@ -357,7 +377,7 @@ class PackageBuilder
     }
 
     /**
-     * @param array<string,array> $configs Параметры <НазваниеTV: конфигурации>
+     * @param array<string,array> $configs Параметры <НазваниеМеню: конфигурации>
      * @return void
      */
     public function addMenu(array $configs)
@@ -388,6 +408,84 @@ class PackageBuilder
         }
     }
 
+    /**
+     * @param array<string,array> $configs Параметры <НазваниеResource: конфигурации>
+     * @return void
+     */
+    public function addResources(array $configs)
+    {
+        $this->checkInitBaseParameter();
+        foreach ($configs as $resourcePageTitle => $resourceConfig) {
+            if (is_string($resourcePageTitle)) {
+
+                $resource = $this->modx->newObject(modResource::class);
+                $resource->set('pagetitle', $resourcePageTitle);
+                foreach ($resourceConfig as $key => $value) {
+                    if ($key === "id") {
+                        continue;
+                    }
+                    if ($key === "published") {
+                        $resource->set($key, 1);
+                        continue;
+                    }
+
+                    if ($key === "content") {
+                        $resource->set($key, ParameterParser::processBuild($value, $this->matchValueParameterParser));
+                        continue;
+                    }
+
+                    if ($key === "template") {
+                        $referenceData = ParameterParser::processBuild($value);
+                        $referenceData = array_merge(
+                            $referenceData,
+                            [
+                                'dependentSearchFieldName' => 'pagetitle',
+                                'dependentUseFieldName' => 'template',
+                            ],
+                        );
+
+                        $this->addLateBindingData(
+                            'modResource',
+                            $resourcePageTitle,
+                            $referenceData
+                        );
+                        continue;
+                    }
+
+                    if ($key === "content_type") {
+                        $referenceData = ParameterParser::processBuild($value);
+                        $referenceData = array_merge(
+                            $referenceData,
+                            [
+                                'dependentSearchFieldName' => 'pagetitle',
+                                'dependentUseFieldName' => 'content_type',
+                            ],
+                        );
+                        $this->addLateBindingData(
+                            'modResource',
+                            $resourcePageTitle,
+                            $referenceData
+                        );
+                        continue;
+                    }
+
+                    if ($key === "show_in_tree") {
+                        $resource->set($key, 1);
+                        continue;
+                    }
+
+                    $resource->set($key, $value);
+                }
+
+                $settingVehicle = new SettingVehicle($this->modx, $this->builder);
+                $settingVehicle->setObject($resource, 'pagetitle');
+                $settingVehicle->putVehicle();
+            } else {
+                throw new Error("Не корректные настройки Resource '" . $resourcePageTitle ?? 'Неизвестный' . "'");
+            }
+        }
+    }
+
     public function initGeneralCategory()
     {
         $this->checkInitBaseParameter();
@@ -400,6 +498,7 @@ class PackageBuilder
         // ]);
 
         $settingVehicle = new SettingVehicle($this->modx, $this->builder);
+        $settingVehicle->addAttribute('LateBindingData', $this->lateBindingData);
         $settingVehicle->setObject($this->generalCategory, 'category');
         $settingVehicle->addRelatedObjAttribute('Snippets', 'name');
         $settingVehicle->addRelatedObjAttribute('Chunks', 'name');
@@ -413,6 +512,7 @@ class PackageBuilder
         }
 
         $settingVehicle->addResolver(rtrim($this->projectPath) . '/_build/resolvers/uninstall_package.resolver.php');
+        $settingVehicle->addResolver(rtrim($this->projectPath) . '/_build/resolvers/LateBindingData.resolver.php');
         $settingVehicle->putVehicle();
     }
 
@@ -551,6 +651,80 @@ function readConfigFile(string $filename, string $directory): array
     }
 }
 
+
+class ParameterParser
+{
+    public static function processBuild(mixed $content, array $params = [])
+    {
+        // Проверяем, начинается ли строка с 'build:'
+        if (is_string($content) && substr($content, 0, 6) === 'build:') {
+            $content = substr($content, 6);
+
+            if (str_starts_with($content, 'path:')) {
+                $content = self::processPath($content, $params);
+            } elseif (str_starts_with($content, 'bd:')) {
+                $content = self::processBd($content);
+            }
+        }
+
+        return $content;
+    }
+
+    public static function processPath(string $content, array $matchValue = []): string
+    {
+        if (substr($content, 0, 5) === 'path:') {
+            $filePath = substr($content, 5);
+            $filePath = self::getNewPath($filePath, $matchValue);
+
+            if (str_starts_with($filePath, 'read:')) {
+                $filePath = str_replace('read:', '', $content);
+                if (file_exists($filePath)) {
+                    return file_get_contents($filePath) ?: '';  // Возвращаем содержимое файла
+                } else {
+                    return '';
+                }
+            }
+
+            return $filePath;
+        }
+
+        return $content;
+    }
+
+    public static function processBd(string $content): mixed
+    {
+        if (str_starts_with($content, 'bd:')) {
+            $valuesQuery = explode(":", str_replace('bd:', '', $content));
+            if (count($valuesQuery) < 4) {
+                return '';
+            }
+
+            return [
+                'tableClassName' => $valuesQuery[0] ?? '',
+                'searchFieldName' => $valuesQuery[1] ?? '',
+                'getFieldName' => $valuesQuery[2] ?? '',
+                'searchFieldValue' => $valuesQuery[3] ?? '',
+            ];
+        }
+
+        return null;
+    }
+
+    public static function getNewPath($path, $matchValue = [])
+    {
+        preg_match_all('/\$\{\{([^}]+)\}\}/', $path, $matches);
+
+        foreach ($matches[1] as $match) {
+            if (isset($matchValue[$match])) {
+                $path = str_replace('${{' . $match . '}}', $matchValue[$match], $path);
+            }
+        }
+
+        return $path;
+    }
+}
+
+
 $packageBuilder = PackageBuilderFactory::createFromConfig(PROJECT_DATA);
 $configPath = PROJECT_DATA['config_path'] ?? null;
 if (!empty($configPath)) {
@@ -559,6 +733,7 @@ if (!empty($configPath)) {
     $packageBuilder->addChunks(readConfigFile('chunks.json', $configPath));
     $packageBuilder->addTemplates(readConfigFile('templates.json', $configPath));
     $packageBuilder->addMenu(readConfigFile('menus.json', $configPath));
+    $packageBuilder->addResources(readConfigFile('resources.json', $configPath));
 }
 
 $packageBuilder->build();

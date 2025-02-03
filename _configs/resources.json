@@ -1,0 +1,21 @@
+{
+    "sitemap": {
+        "type": "document",
+        "longtitle": "Длинное название",
+        "description": "Описание",
+        "alias": "sitemap",
+        "parent": 0,
+        "isfolder": 0,
+        "introtext": "Краткое описание ресурса",
+        "content": "",
+        "template": "build:bd:modTemplate:templatename:id:sitemap",
+        "searchable": 1,
+        "cacheable": 0,
+        "class_key": "MODX\\Revolution\\modDocument",
+        "context_key": "web",
+        "content_type": "build:bd:modContentType:name:id:XML",
+        "uri": "sitemap.xml",
+        "uri_override": 0,
+        "hide_children_in_tree": 0
+    }
+}
