@@ -148,7 +148,7 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
             ids
         );
         // console.log(menu);
-        
+
 
         this.addContextMenuItem(menu);
     },
@@ -164,7 +164,7 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
             let rowIndex = this.getStore().find("id", id);
             const row = this.getStore().getAt(rowIndex);
             console.log(row);
-            
+
             if (typeof row.editProduct !== "object") {
                 row.editProduct = MODx.load({
                     xtype: "packer-window-settings",
@@ -223,8 +223,8 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
                 success: {
                     fn: function (response) {
                         this.refresh();
-                        
-                        if(typeof response?.message === "string" && response.message !== ""){
+
+                        if (typeof response?.message === "string" && response.message !== "") {
                             MODx.msg.alert('КОНСОЛЬ', response.message);
                         }
                     },
@@ -234,6 +234,74 @@ Ext.extend(packerInstance.grid.Components, MODx.grid.Grid, {
                     fn: function (response) {
                         // Если запрос завершился неудачей, отображаем сообщение об ошибке
                         var errorMessage = response.message || 'Произошла ошибка при укпаковки компонента.';
+                        MODx.msg.alert('Ошибка', errorMessage);
+                    },
+                    scope: this,
+                },
+            },
+        });
+    },
+
+    initElementsComponent: function () {
+        const ids = this._getSelectedIds();
+        if (!ids.length) {
+            return false;
+        }
+        MODx.Ajax.request({
+            url: this.config.url,
+            params: {
+                action: "Packer\\Processors\\InitPackageProcessor",
+                ids: Ext.util.JSON.encode(ids),
+            },
+            listeners: {
+                success: {
+                    fn: function (response) {
+                        this.refresh();
+
+                        if(typeof response?.message === "string" && response.message !== ""){
+                            MODx.msg.alert('КОНСОЛЬ', response.message);
+                        }
+                    },
+                    scope: this,
+                },
+                failure: {
+                    fn: function (response) {
+                        // Если запрос завершился неудачей, отображаем сообщение об ошибке
+                        var errorMessage = response.message || 'Произошла ошибка при Инициализации компонента.';
+                        MODx.msg.alert('Ошибка', errorMessage);
+                    },
+                    scope: this,
+                },
+            },
+        });
+    },
+
+    deleteInitElementsComponent: function () {
+        const ids = this._getSelectedIds();
+        if (!ids.length) {
+            return false;
+        }
+        MODx.Ajax.request({
+            url: this.config.url,
+            params: {
+                action: "Packer\\Processors\\DeletePackageProcessor",
+                ids: Ext.util.JSON.encode(ids),
+            },
+            listeners: {
+                success: {
+                    fn: function (response) {
+                        this.refresh();
+
+                        if (typeof response?.message === "string" && response.message !== "") {
+                            MODx.msg.alert('КОНСОЛЬ', response.message);
+                        }
+                    },
+                    scope: this,
+                },
+                failure: {
+                    fn: function (response) {
+                        // Если запрос завершился неудачей, отображаем сообщение об ошибке
+                        var errorMessage = response.message || 'Произошла ошибка при Удалении компонента.';
                         MODx.msg.alert('Ошибка', errorMessage);
                     },
                     scope: this,

@@ -4,11 +4,10 @@ namespace Packer\Processors;
 
 use MODX\Revolution\modX;
 use Packer\Model\PackerProjects;
-use MODX\Revolution\modNamespace;
 use MODX\Revolution\Processors\Processor;
-use Packer\Services\PackageBuilder\PackageBuilderFactory;
+use Packer\Services\PackageInit\PackageInitFactory;
 
-class BuildPackageProcessor extends Processor
+class InitPackageProcessor extends Processor
 {
     public function process()
     {
@@ -35,19 +34,19 @@ class BuildPackageProcessor extends Processor
         $this->modx->log(modX::LOG_LEVEL_INFO, $filePath);
         if (file_exists($filePath)) {
             $dataPackerProject = json_decode(file_get_contents($filePath), true);
-            $packageBuilder = PackageBuilderFactory::createFromConfig($dataPackerProject);
+            $packageInit = PackageInitFactory::createFromConfig($dataPackerProject);
 
             $configPath = $dataPackerProject['config_path'] ?? null;
             if (!empty($configPath)) {
-                $packageBuilder->addTv($this->readConfigFile('tvs.json', $configPath));
-                $packageBuilder->addSnippets($this->readConfigFile('snippets.json', $configPath));
-                $packageBuilder->addChunks($this->readConfigFile('chunks.json', $configPath));
-                $packageBuilder->addTemplates($this->readConfigFile('templates.json', $configPath));
-                $packageBuilder->addMenu($this->readConfigFile('menus.json', $configPath));
-                $packageBuilder->addResources($this->readConfigFile('resources.json', $configPath));
+                $packageInit->addTv($this->readConfigFile('tvs.json', $configPath));
+                $packageInit->addSnippets($this->readConfigFile('snippets.json', $configPath));
+                $packageInit->addChunks($this->readConfigFile('chunks.json', $configPath));
+                $packageInit->addTemplates($this->readConfigFile('templates.json', $configPath));
+                $packageInit->addMenu($this->readConfigFile('menus.json', $configPath));
+                $packageInit->addResources($this->readConfigFile('resources.json', $configPath));
             }
 
-            $packageBuilder->build();
+            $packageInit->init();
         }
 
         return null;

@@ -81,6 +81,26 @@ class GetCreatedComponentsProcessor extends Processor
                 "title" => "Упаковать",
             ],
             [
+                "action" => "initElementsComponent",
+                "button" => false,  // Показывать в колонке действия
+                "cls" => "",
+                "icon" => "icon-arrow",
+                "menu" => true,
+                "multiple" => false,
+                "onlyMultiple" => false,
+                "title" => "Инициализировать элементы и тд. компонента",
+            ],
+            [
+                "action" => "deleteInitElementsComponent",
+                "button" => false,
+                "cls" => "",
+                "icon" => "icon-arrow",
+                "menu" => true,
+                "multiple" => false,
+                "onlyMultiple" => false,
+                "title" => "Удалить инициал. элементы и тд. компонента",
+            ],
+            [
                 "action" => "removeItem",
                 "button" => true,
                 "cls" => "",
