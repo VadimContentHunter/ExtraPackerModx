@@ -146,7 +146,11 @@ class PackageInit
 
     public function addToGeneralCategory(xPDOObject $obj)
     {
-        $this->initCategory();
+        if ($this->generalCategory === null) {
+            $this->generalCategory = $this->modx->newObject(modCategory::class, [
+                'category' => 'Extra' . trim($this->projectName)
+            ]);
+        }
         $this->generalCategory->addMany($obj);
     }
 

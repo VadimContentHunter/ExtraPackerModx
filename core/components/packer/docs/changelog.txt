@@ -1,5 +1,11 @@
 # Changelog for Packer
 
+## 1.0.1-pl
+---
+### Fixed
+- fixed update general category
+
+
 ## 1.0.0-pl
 ---
 ### Added
