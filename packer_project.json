@@ -1,13 +1,13 @@
 {
     "project_name": "Packer",
-    "project_path": "/var/www/test-modx/extras/Packer/",
-    "project_assets_url": "extras/Packer/assets/components/packer/",
-    "relative_core_path": "extras/Packer/core/components/packer/",
+    "project_path": "/var/www/test-modx/extras/ExtraPackerModx/",
+    "project_assets_url": "extras/ExtraPackerModx/assets/components/packer/",
+    "relative_core_path": "extras/ExtraPackerModx/core/components/packer/",
     "system_namespace_name": "packer",
-    "system_namespace_path_core": "/var/www/test-modx/extras/Packer/core/components/packer/",
-    "system_namespace_path_assets": "/var/www/test-modx/extras/Packer/assets/components/packer/",
+    "system_namespace_path_core": "/var/www/test-modx/extras/ExtraPackerModx/core/components/packer/",
+    "system_namespace_path_assets": "/var/www/test-modx/extras/ExtraPackerModx/assets/components/packer/",
     "system_assets_url_key": "extra_packer_assets_url",
     "version": "1.0",
     "release": "dev",
-    "config_path": "/var/www/test-modx/extras/Packer/_configs"
+    "config_path": "/var/www/test-modx/extras/ExtraPackerModx/_configs"
 }

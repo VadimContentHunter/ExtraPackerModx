@@ -1,29 +1,38 @@
-Changelog for modExtra.
+# Changelog for Packer
 
-2.0.0-pl
-==============
-- New build script.
-- [#4] Ability to specify the exact repository to install package from.
-- [#6] Renaming script works in any environment.
-- Updated tables resolver.
-- All tables now InnoDB by default.
+## 1.0.0-pl
+---
+### Added
+- Created `InitPackage` service.
+- Created `PackageInit`.
+- Added function for `InitBaseProject`.
+- Created `PackageBuilder` service.
+- Added support for `Late Binding Data`.
+- Added resolver for uninstalling the package.
+- Added menu designer.
+- Added `readConfigFile` function.
+- Created `build package processor`.
+- Added generation of base files and folders.
+- Added function for initializing base project.
+- Added check and creation of `packer_projects` table in bootstrap.
+
+### Fixed
+- Fixed late binding data.
+- Fixed save settings.
+- Fixed form for setting fields.
+- Fixed `allowBlank` for fields.
+- Fixed delete component process.
+- Minor fixes in save and get settings processor.
+- Fixed clear database in `uninstall_package.resolver`.
+- Fixed install package process.
+- Fixed get processor.
+- Fixed get components for grid.
+- Fixed create and setting panel for components.
+- Fixed `build table` script.
+
+### Changed
+- Renamed `Setting` class to `Main` class.
+- Refactored client panel.
+
+### Removed
 - Removed shell renaming script.
-
-1.0.1-beta
-==============
-- PSR-2
-- Requires at least MODX 2.3
-- Disabling "office" resolver will clear its files from built package.
-- Fixed some typos.
-
-1.0.0-beta
-==============
-- Optimized for MODX 2.3
-- Improved processors
-- Disabled plugin and system settings
-- Improved UI
-- Added grid actions
-- Added icons in menu
-- Added search in grid
-- Grid sorting
-- Enable and disable actions
