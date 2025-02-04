@@ -146,6 +146,7 @@ class PackageBuilder
             "core_path" => $this->sourceCore,
             "assets_path" => $this->sourceAssets ?? '',
             "namespace_name" => $this->namespaceName,
+            "relative_core_path" => $this->config['relative_core_path'] ?? 'core/components/' . $this->namespaceName . '/',
         ];
 
         $this->modx = new modX();
