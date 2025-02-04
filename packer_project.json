@@ -7,7 +7,7 @@
     "system_namespace_path_core": "/var/www/test-modx/extras/ExtraPackerModx/core/components/packer/",
     "system_namespace_path_assets": "/var/www/test-modx/extras/ExtraPackerModx/assets/components/packer/",
     "system_assets_url_key": "extra_packer_assets_url",
-    "version": "1.0.3",
-    "release": "dev",
+    "version": "1.0.4",
+    "release": "rl",
     "config_path": "/var/www/test-modx/extras/ExtraPackerModx/_configs"
 }

@@ -1,5 +1,11 @@
 # Changelog for Packer
 
+## 1.0.4-pl
+---
+### Fixed
+- fixed path resolvers for PackageBuilder
+
+
 ## 1.0.3-pl
 ---
 ### Fixed

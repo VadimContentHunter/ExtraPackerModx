@@ -15,6 +15,7 @@ use MODX\Revolution\modNamespace;
 use Packer\Utils\ParameterParser;
 use MODX\Revolution\modTemplateVar;
 use MODX\Revolution\Transport\modPackageBuilder;
+use Packer\Packer;
 use Packer\Services\PackageBuilder\SettingVehicle;
 
 class PackageBuilder
@@ -28,6 +29,8 @@ class PackageBuilder
     private array $matchValueParameterParser  = [];
 
     private array $lateBindingData = [];
+
+    private ?Packer $packer = null;
 
     /**
      * @param string $projectName
@@ -61,11 +64,12 @@ class PackageBuilder
         $this->modx->setLogLevel(modX::LOG_LEVEL_INFO);
         $this->modx->setLogTarget(XPDO_CLI_MODE ? 'ECHO' : 'HTML');
 
+        $this->packer = $this->modx->services->get('Packer');
         $this->initPackage();
-
         $this->generalCategory = $this->modx->newObject(modCategory::class, [
             'category' => $this->projectName
         ]);
+        
     }
 
     public function addLateBindingData(
@@ -416,8 +420,8 @@ class PackageBuilder
             $settingVehicle->copyFile($this->sourceAssets, '/var/www/test-modx/assets/' . 'components/');
         }
 
-        $settingVehicle->addResolver(rtrim($this->sourceCore) . '/services/PackageBuilder/resolvers/uninstall_package.resolver.php');
-        $settingVehicle->addResolver(rtrim($this->sourceCore) . '/services/PackageBuilder/resolvers/LateBindingData.resolver.php');
+        $settingVehicle->addResolver($this->packer->buildPath('corePath', 'services/PackageBuilder/resolvers/uninstall_package.resolver.php') );
+        $settingVehicle->addResolver($this->packer->buildPath('corePath', 'services/PackageBuilder/resolvers/LateBindingData.resolver.php'));
         $settingVehicle->putVehicle();
     }
 
