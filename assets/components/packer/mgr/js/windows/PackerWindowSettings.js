@@ -227,6 +227,18 @@ Ext.extend(packerInstance.window.Settings, MODx.Window, {
                     defaultAllowBlank: true,
                 },
             }),
+            packerInstance.utils.getFieldObject({
+                fieldLabel: "Введите относительный путь для вашего ядра во время разработки",
+                fieldName: "relative_core_path",
+                descriptionText:
+                    "Введите относительный путь к ядру (core). Можно использовать плейсхолдеры, пример: {core_path}. Данный путь будет использоватся во время разработки.",
+                allowBlank: true,
+                config: {
+                    vtype: "UrlPath",
+                    msgTarget: "under",
+                    defaultAllowBlank: true,
+                },
+            }),
         ];
     },
 

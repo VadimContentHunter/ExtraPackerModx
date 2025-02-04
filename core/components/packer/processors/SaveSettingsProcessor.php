@@ -31,6 +31,7 @@ class SaveSettingsProcessor extends Processor
         $projectName = $this->getProperty('project_name');
         $projectPath = $this->getProperty('project_path');
         $projectAssetsUrl = $this->getProperty('project_assets_url');
+        $relativeCorePath = $this->getProperty('relative_core_path');
         $systemNamespaceName = $this->getProperty('system_namespace_name');
         $systemNamespacePathCore = $this->getProperty('system_namespace_path_core', "");
         $systemNamespacePathAssets = $this->getProperty('system_namespace_path_assets', "");
@@ -66,6 +67,7 @@ class SaveSettingsProcessor extends Processor
                 "project_name" => $projectName,
                 "project_path" => $projectPath,
                 "project_assets_url" => $sysAssetsUrl !== null ? $sysAssetsUrl->get("value") : "",
+                "relative_core_path" => $relativeCorePath,
                 "system_namespace_name" => strtolower($namespaceName),
                 "system_namespace_path_core" => $systemNamespacePathCore ?? '',
                 "system_namespace_path_assets" => $systemNamespacePathAssets ?? '',
@@ -125,18 +127,25 @@ class SaveSettingsProcessor extends Processor
         $projectParentPath = rtrim($projectParentPath, '\\/');
         $projectPath = $projectParentPath . '/' . $projectFolderName;
         $projectAssetsUrl = '';
+        $relativeCorePath = '';
         $namespaceName = mb_strtolower($projectName);
         $namespaceAssets = $projectPath . '/assets/components/' . $namespaceName;
         $namespaceCore = $projectPath . '/core/components/' . $namespaceName;
 
         // Если путь содержит ядро, то убираем его
         if (strpos($namespaceAssets, $basePath) === 0) {
-            $projectAssetsUrl = trim(substr($namespaceAssets, strlen($basePath)), '\\/');
+            $projectAssetsUrl = trim(substr($namespaceAssets, strlen($basePath)), '\\/') . '/';
+        }
+
+        // Если путь содержит ядро, то убираем его
+        if (strpos($namespaceAssets, $basePath) === 0) {
+            $relativeCorePath = trim(substr($namespaceCore, strlen($basePath)), '\\/') . '/';
         }
 
         $this->setProperty('project_name', $projectName);
         $this->setProperty('project_path', $projectPath . '/');
-        $this->setProperty('project_assets_url', $projectAssetsUrl . '/');
+        $this->setProperty('project_assets_url', $projectAssetsUrl);
+        $this->setProperty('relative_core_path', $relativeCorePath);
         $this->setProperty('system_namespace_name', $namespaceName);
         $this->setProperty('system_namespace_path_core', $namespaceCore . '/');
         $this->setProperty('system_namespace_path_assets', $namespaceAssets . '/');
