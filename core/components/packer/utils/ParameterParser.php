@@ -26,7 +26,7 @@ class ParameterParser
             $filePath = self::getNewPath($filePath, $matchValue);
 
             if (str_starts_with($filePath, 'read:')) {
-                $filePath = str_replace('read:', '', $content);
+                $filePath = str_replace('read:', '', $filePath);
                 if (file_exists($filePath)) {
                     return file_get_contents($filePath) ?: '';  // Возвращаем содержимое файла
                 } else {

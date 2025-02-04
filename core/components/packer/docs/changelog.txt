@@ -1,5 +1,11 @@
 # Changelog for Packer
 
+## 1.0.5-pl
+---
+### Fixed
+- fixed correct content variable to filePath in ParameterParser::processPath
+
+
 ## 1.0.4-pl
 ---
 ### Fixed
