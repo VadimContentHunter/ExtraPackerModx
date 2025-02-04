@@ -103,9 +103,10 @@ class PackageInit
     public function executeLateBindingData(): bool
     {
         foreach ($this->lateBindingData as $className => $classData) {
+            $className = 'MODX\Revolution\\' . $className;
+
             foreach ($classData as $dependentSearchFieldValue => $useData) {
                 foreach ($useData as $useFieldName => $referenceData) {
-                    $className                  = 'MODX\Revolution\\' . $className;
                     $dependentSearchFieldName   = $referenceData['dependentSearchFieldName'] ?? '';
                     $tableClassName             = $referenceData['tableClassName'] ?? '';
                     $searchFieldName            = $referenceData['searchFieldName'] ?? '';
