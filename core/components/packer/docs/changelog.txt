@@ -1,9 +1,14 @@
 # Changelog for Packer
 
+## 1.0.3-pl
+---
+### Fixed
+- fixed save for executeLateBindingData method
+
+
 ## 1.0.2-pl
 ---
 ### Fixed
-- fixed update general category
 - fixed init className for executeLateBindingData method
 
 

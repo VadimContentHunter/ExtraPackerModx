@@ -122,7 +122,17 @@ class PackageInit
                         ]);
                         if ($referenceObj instanceof $tableClassName) {
                             $objResource->set($useFieldName, $referenceObj->get($getFieldName));
-                            return $objResource->save();
+                            if($objResource->save()){
+                                $this->modx->log(
+                                    modX::LOG_LEVEL_INFO,
+                                    '[Позднее связывание] Присвоено зависимому ресурсу '. $objResource->get('id')
+                                );
+                            } else {
+                                $this->modx->log(
+                                    modX::LOG_LEVEL_ERROR,
+                                    '[Позднее связывание] Ошибка при сохранении зависимого ресурса '. $objResource->get('id')
+                                );
+                            }
                         }
                     }
                     // END
